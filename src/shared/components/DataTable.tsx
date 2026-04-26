@@ -23,15 +23,23 @@ export function DataTable<T>({ columns, data }: Props<T>) {
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-t border-slate-100">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-3 py-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {table.getRowModel().rows.length === 0 ? (
+            <tr>
+              <td className="px-3 py-8 text-center text-sm text-slate-500" colSpan={columns.length}>
+                No records found.
+              </td>
             </tr>
-          ))}
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="border-t border-slate-100 transition-colors hover:bg-slate-50/70">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-3 py-2.5 align-middle">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

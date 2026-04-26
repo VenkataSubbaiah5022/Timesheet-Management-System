@@ -1,12 +1,11 @@
 import dayjs from "dayjs";
 import type { AttendanceEntry, Employee } from "../types/domain";
+import { netWorkedHours } from "./shift";
 
+/** Net hours for a closed shift (payroll). Open shifts return 0 until clock-out. */
 export function calcWorkedHours(entry: AttendanceEntry): number {
   if (!entry.clockOutAt) return 0;
-  const start = dayjs(entry.clockInAt);
-  const end = dayjs(entry.clockOutAt);
-  const mins = Math.max(end.diff(start, "minute") - entry.breakMinutes, 0);
-  return Number((mins / 60).toFixed(2));
+  return netWorkedHours(entry, dayjs(entry.clockOutAt));
 }
 
 export function calcPayable(entry: AttendanceEntry, employee: Employee): number {

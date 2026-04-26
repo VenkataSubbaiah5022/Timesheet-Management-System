@@ -1,16 +1,47 @@
 import autoTable from "jspdf-autotable";
 import jsPDF from "jspdf";
 import Papa from "papaparse";
+import dayjs from "dayjs";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { CalendarClock, Mail, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { apiClient } from "../../services/api/client";
-import { Button } from "../../shared/components/ui/button";
 import { Card } from "../../shared/components/ui/card";
 import { money } from "../../shared/utils/calc";
 
 export function ReportsPage() {
+  const [employeeFilter, setEmployeeFilter] = useState("all");
+  const [fromDate, setFromDate] = useState(dayjs().subtract(30, "day").format("YYYY-MM-DD"));
+  const [toDate, setToDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [search, setSearch] = useState("");
+  const [scheduleFrequency, setScheduleFrequency] = useState<"weekly" | "monthly">("weekly");
+  const [scheduleTime, setScheduleTime] = useState("09:00");
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [emailTo, setEmailTo] = useState("finance@demo.com");
+  const [emailSubject, setEmailSubject] = useState("Timesheet Report");
+  const [mockMessage, setMockMessage] = useState<string | null>(null);
+
+  const employees = useQuery({ queryKey: ["employees"], queryFn: apiClient.employees });
   const attendance = useQuery({ queryKey: ["attendance"], queryFn: apiClient.attendance });
-  const rows = attendance.data ?? [];
+
+  const rows = useMemo(() => {
+    const from = dayjs(fromDate).startOf("day");
+    const to = dayjs(toDate).endOf("day");
+    const q = search.trim().toLowerCase();
+    return (attendance.data ?? []).filter((row) => {
+      const employeeOk = employeeFilter === "all" ? true : row.employeeName === employeeFilter;
+      const date = dayjs(row.clockInAt);
+      const dateOk = (date.isAfter(from) || date.isSame(from)) && (date.isBefore(to) || date.isSame(to));
+      const searchOk = !q || row.employeeName.toLowerCase().includes(q);
+      return employeeOk && dateOk && searchOk;
+    });
+  }, [attendance.data, employeeFilter, fromDate, toDate, search]);
+
   const total = rows.reduce((sum, row) => sum + row.payableAmount, 0);
+  const approvedCount = rows.filter((r) => r.approvalStatus === "approved").length;
+  const pendingCount = rows.filter((r) => r.approvalStatus === "pending").length;
 
   const downloadCsv = () => {
     const csv = Papa.unparse(
@@ -20,6 +51,8 @@ export function ReportsPage() {
         clockOut: r.clockOutAt ?? "",
         workedHours: r.workedHours,
         payableAmount: r.payableAmount,
+        approvalStatus: r.approvalStatus,
+        notes: r.notes,
       }))
     );
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -32,23 +65,147 @@ export function ReportsPage() {
   const downloadPdf = () => {
     const doc = new jsPDF();
     doc.text("Timesheet Report", 14, 14);
+    doc.text(`Date Range: ${fromDate} to ${toDate}`, 14, 20);
+    doc.text(`Employee: ${employeeFilter === "all" ? "All" : employeeFilter}`, 14, 26);
     autoTable(doc, {
-      startY: 20,
-      head: [["Employee", "Clock In", "Clock Out", "Hours", "Payable"]],
-      body: rows.map((r) => [r.employeeName, r.clockInAt, r.clockOutAt ?? "-", String(r.workedHours), String(r.payableAmount)]),
+      startY: 32,
+      head: [["Employee", "Clock In", "Clock Out", "Hours", "Payable", "Approval"]],
+      body: rows.map((r) => [r.employeeName, r.clockInAt, r.clockOutAt ?? "-", String(r.workedHours), String(r.payableAmount), r.approvalStatus]),
     });
     doc.text(`Total Payable: ${money(total)}`, 14, 280);
     doc.save("timesheet-report.pdf");
   };
 
   return (
-    <Card className="space-y-3">
-      <h3 className="font-semibold">Reports</h3>
-      <p className="text-sm text-slate-600">Total payable amount: {money(total)}</p>
-      <div className="flex gap-2">
-        <Button onClick={downloadCsv}>Download CSV</Button>
-        <Button onClick={downloadPdf}>Download PDF</Button>
+    <div className="space-y-4">
+      {mockMessage && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{mockMessage}</div>
+      )}
+
+      <Card className="space-y-3">
+        <h3 className="font-semibold">Report Filters</h3>
+        <div className="grid gap-2 md:grid-cols-5">
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">From</label>
+            <input
+              type="date"
+              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">To</label>
+            <input
+              type="date"
+              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Employee</label>
+            <select
+              className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm"
+              value={employeeFilter}
+              onChange={(e) => setEmployeeFilter(e.target.value)}
+            >
+              <option value="all">All employees</option>
+              {(employees.data ?? []).map((emp) => (
+                <option key={emp.id} value={emp.name}>
+                  {emp.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Quick Search</label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-2 h-4 w-4 text-slate-400" />
+              <Input className="h-8 pl-8" placeholder="Search employee..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="space-y-3">
+        <h3 className="font-semibold">Download Reports</h3>
+        <div className="grid gap-2 sm:grid-cols-3 text-sm">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-slate-500">Matched Entries</p>
+            <p className="font-semibold text-slate-900">{rows.length}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-slate-500">Approved / Pending</p>
+            <p className="font-semibold text-slate-900">{approvedCount} / {pendingCount}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-slate-500">Total Payable</p>
+            <p className="font-semibold text-slate-900">{money(total)}</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={downloadCsv}>Download CSV</Button>
+          <Button variant="outline" onClick={downloadPdf}>Download PDF</Button>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="space-y-3">
+          <h3 className="font-semibold flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Scheduled Reports (Mock)</h3>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Frequency</label>
+              <select
+                className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm"
+                value={scheduleFrequency}
+                onChange={(e) => setScheduleFrequency(e.target.value as "weekly" | "monthly")}
+              >
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Time</label>
+              <input
+                type="time"
+                className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+                value={scheduleTime}
+                onChange={(e) => setScheduleTime(e.target.value)}
+              />
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setScheduleEnabled((v) => !v);
+              setMockMessage(`Scheduled report ${scheduleEnabled ? "disabled" : "enabled"} (${scheduleFrequency} at ${scheduleTime}) [mock].`);
+            }}
+          >
+            {scheduleEnabled ? "Disable Schedule" : "Enable Schedule"}
+          </Button>
+        </Card>
+
+        <Card className="space-y-3">
+          <h3 className="font-semibold flex items-center gap-2"><Mail className="h-4 w-4" /> Email Report (Mock)</h3>
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Recipient Email</label>
+            <Input className="h-8" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Subject</label>
+            <Input className="h-8" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
+          </div>
+          <Button
+            variant="outline"
+            onClick={() =>
+              setMockMessage(`Report email queued to ${emailTo} with subject "${emailSubject}" [mock feature].`)
+            }
+          >
+            Send Email Report
+          </Button>
+        </Card>
       </div>
-    </Card>
+    </div>
   );
 }

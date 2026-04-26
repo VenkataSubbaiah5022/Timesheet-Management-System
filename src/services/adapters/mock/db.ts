@@ -1,13 +1,43 @@
 import dayjs from "dayjs";
-import type { AttendanceEntry, Employee, User } from "../../../shared/types/domain";
+import {
+  defaultNotificationPrefs,
+  type AttendanceEntry,
+  type Employee,
+  type Role,
+  type User,
+} from "../../../shared/types/domain";
 
-interface MockDb {
+export interface MockDb {
   users: User[];
   employees: Employee[];
   attendance: AttendanceEntry[];
 }
 
-const DB_KEY = "timesheet-db-v1";
+export const MOCK_DB_KEY = "timesheet-db-v2";
+
+function normalizeUserLoose(raw: Record<string, unknown>): User {
+  const prefsRaw = raw.notificationPrefs;
+  const mergedPrefs =
+    typeof prefsRaw === "object" && prefsRaw !== null && !Array.isArray(prefsRaw)
+      ? { ...defaultNotificationPrefs(), ...(prefsRaw as Record<string, boolean>) }
+      : defaultNotificationPrefs();
+  return {
+    id: String(raw.id),
+    name: String(raw.name),
+    email: String(raw.email),
+    role: raw.role as Role,
+    passwordMock: String(raw.passwordMock),
+    phone: typeof raw.phone === "string" ? raw.phone : "",
+    avatarDataUrl: typeof raw.avatarDataUrl === "string" ? raw.avatarDataUrl : null,
+    lastLoginAt: typeof raw.lastLoginAt === "string" ? raw.lastLoginAt : null,
+    notificationPrefs: {
+      emailApprovals: Boolean(mergedPrefs.emailApprovals),
+      emailWeeklyDigest: Boolean(mergedPrefs.emailWeeklyDigest),
+      pushBrowser: Boolean(mergedPrefs.pushBrowser),
+    },
+    mockSessionEpoch: typeof raw.mockSessionEpoch === "number" ? raw.mockSessionEpoch : 0,
+  };
+}
 
 const seedDb: MockDb = {
   users: [
@@ -17,6 +47,11 @@ const seedDb: MockDb = {
       email: "admin@demo.com",
       role: "admin",
       passwordMock: "admin123",
+      phone: "+1 (555) 010-1000",
+      avatarDataUrl: null,
+      lastLoginAt: null,
+      notificationPrefs: defaultNotificationPrefs(),
+      mockSessionEpoch: 0,
     },
     {
       id: "u-emp-1",
@@ -24,6 +59,11 @@ const seedDb: MockDb = {
       email: "arjun@demo.com",
       role: "employee",
       passwordMock: "emp123",
+      phone: "+91 98765 43210",
+      avatarDataUrl: null,
+      lastLoginAt: null,
+      notificationPrefs: defaultNotificationPrefs(),
+      mockSessionEpoch: 0,
     },
     {
       id: "u-emp-2",
@@ -31,6 +71,23 @@ const seedDb: MockDb = {
       email: "neha@demo.com",
       role: "employee",
       passwordMock: "emp123",
+      phone: "+91 91234 56780",
+      avatarDataUrl: null,
+      lastLoginAt: null,
+      notificationPrefs: defaultNotificationPrefs(),
+      mockSessionEpoch: 0,
+    },
+    {
+      id: "u-manager",
+      name: "Riya Kapoor",
+      email: "manager@demo.com",
+      role: "manager",
+      passwordMock: "manager123",
+      phone: "+1 (555) 010-2200",
+      avatarDataUrl: null,
+      lastLoginAt: null,
+      notificationPrefs: defaultNotificationPrefs(),
+      mockSessionEpoch: 0,
     },
   ],
   employees: [
@@ -44,6 +101,9 @@ const seedDb: MockDb = {
       clockInAt: dayjs().subtract(1, "day").hour(9).minute(5).toISOString(),
       clockOutAt: dayjs().subtract(1, "day").hour(18).minute(0).toISOString(),
       breakMinutes: 45,
+      breakStartAt: null,
+      approvalStatus: "pending",
+      notes: "",
     },
     {
       id: "a-2",
@@ -51,19 +111,49 @@ const seedDb: MockDb = {
       clockInAt: dayjs().subtract(1, "day").hour(10).minute(0).toISOString(),
       clockOutAt: dayjs().subtract(1, "day").hour(19).minute(10).toISOString(),
       breakMinutes: 30,
+      breakStartAt: null,
+      approvalStatus: "pending",
+      notes: "",
     },
   ],
 };
 
+function normalizeAttendance(entries: AttendanceEntry[]): AttendanceEntry[] {
+  return entries.map((e) => ({
+    ...e,
+    breakStartAt: e.breakStartAt ?? null,
+    breakMinutes: typeof e.breakMinutes === "number" ? e.breakMinutes : 0,
+    approvalStatus: e.approvalStatus ?? "pending",
+    notes: e.notes ?? "",
+  }));
+}
+
+function mergeMissingSeedUsers(parsed: MockDb): MockDb {
+  const emails = new Set(parsed.users.map((u) => u.email));
+  const additions = seedDb.users.filter((u) => !emails.has(u.email));
+  if (additions.length === 0) return parsed;
+  return { ...parsed, users: [...parsed.users, ...additions] };
+}
+
 export function readDb(): MockDb {
-  const raw = localStorage.getItem(DB_KEY);
+  const raw = localStorage.getItem(MOCK_DB_KEY);
   if (!raw) {
-    localStorage.setItem(DB_KEY, JSON.stringify(seedDb));
-    return seedDb;
+    const initial: MockDb = {
+      ...seedDb,
+      attendance: seedDb.attendance.map((a) => ({ ...a })),
+      users: seedDb.users.map((u) => ({ ...u, notificationPrefs: { ...u.notificationPrefs } })),
+    };
+    localStorage.setItem(MOCK_DB_KEY, JSON.stringify(initial));
+    return initial;
   }
-  return JSON.parse(raw) as MockDb;
+  const parsed = JSON.parse(raw) as MockDb;
+  parsed.attendance = normalizeAttendance(parsed.attendance ?? []);
+  parsed.users = (parsed.users ?? []).map((u) => normalizeUserLoose(u as unknown as Record<string, unknown>));
+  const merged = mergeMissingSeedUsers(parsed);
+  if (merged !== parsed) writeDb(merged);
+  return merged;
 }
 
 export function writeDb(next: MockDb): void {
-  localStorage.setItem(DB_KEY, JSON.stringify(next));
+  localStorage.setItem(MOCK_DB_KEY, JSON.stringify(next));
 }
