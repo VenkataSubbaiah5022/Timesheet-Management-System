@@ -15,6 +15,19 @@ Build check:
 npm run build
 ```
 
+## Submission Guidelines
+
+- GitHub Repository: [Timesheet-Management-System](https://github.com/VenkataSubbaiah5022/Timesheet-Management-System)
+- Setup Instructions:
+  - `npm install`
+  - `npm run dev`
+  - `npm run build` (verification build)
+- Approach:
+  - Built with React + TypeScript using a feature-first structure.
+  - Uses an API contract layer (`src/services/api/client.ts`) with mock data adapters to keep the app backend-ready.
+  - Implements role-based admin/employee workflows, timesheet/payroll calculations, visualization, and reporting.
+- Live Link (Optional): [https://timesheet-management-system-sage.vercel.app/](https://timesheet-management-system-sage.vercel.app/)
+
 ## Demo Credentials
 
 - Admin: `admin@demo.com` / `admin123`

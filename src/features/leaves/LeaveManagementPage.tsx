@@ -45,6 +45,7 @@ export function LeaveManagementPage() {
   const user = useAuthStore((s) => s.user)!;
   const queryClient = useQueryClient();
   const isReviewer = user.role === "admin" || user.role === "manager";
+  const canApplyLeave = user.role === "employee";
   const leaveTypes = useWorkspaceSettingsStore((s) => s.settings.leave.types).filter(Boolean);
   const defaultType = leaveTypes[0] ?? "Annual";
   const [draft, setDraft] = useState<Draft>(() => emptyDraft(defaultType));
@@ -132,6 +133,17 @@ export function LeaveManagementPage() {
       return employeeOk && statusOk && typeOk && qOk && dateOk;
     });
   }, [source, isReviewer, employeeFilter, statusFilter, typeFilter, search, fromFilter, toFilter]);
+  const reviewerSummary = useMemo(() => {
+    if (!isReviewer) return null;
+    return source.reduce(
+      (acc, row) => {
+        acc.total += 1;
+        acc[row.status] += 1;
+        return acc;
+      },
+      { total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0 }
+    );
+  }, [isReviewer, source]);
 
   const monthDays = useMemo(() => {
     const start = monthCursor.startOf("month");
@@ -158,62 +170,64 @@ export function LeaveManagementPage() {
 
   return (
     <div className="space-y-4">
-      <Card className="space-y-3 p-4">
-        <h2 className="text-lg font-semibold text-foreground">{draft.id ? "Edit Leave Request" : "Apply Leave"}</h2>
-        <div className="grid gap-2 md:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Type</label>
-            <select
-              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
-              value={draft.type}
-              onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
-            >
-              {leaveTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+      {canApplyLeave ? (
+        <Card className="space-y-3 p-4">
+          <h2 className="text-lg font-semibold text-foreground">{draft.id ? "Edit Leave Request" : "Apply Leave"}</h2>
+          <div className="grid gap-2 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Type</label>
+              <select
+                className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
+                value={draft.type}
+                onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
+              >
+                {leaveTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Attachment (optional)</label>
+              <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-2 text-sm">
+                <Paperclip className="h-4 w-4" />
+                <span className="truncate">{draft.attachmentName ?? "Upload proof (medical, etc.)"}</span>
+                <input type="file" className="hidden" onChange={(e) => onAttachment(e.target.files?.[0] ?? null)} />
+              </label>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">From</label>
+              <Input type="date" value={draft.fromDate} onChange={(e) => setDraft((d) => ({ ...d, fromDate: e.target.value }))} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">To</label>
+              <Input type="date" value={draft.toDate} onChange={(e) => setDraft((d) => ({ ...d, toDate: e.target.value }))} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Reason</label>
+              <textarea
+                rows={3}
+                className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-sm"
+                value={draft.reason}
+                onChange={(e) => setDraft((d) => ({ ...d, reason: e.target.value }))}
+                placeholder="Reason for leave..."
+              />
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Attachment (optional)</label>
-            <label className="flex h-8 cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-2 text-sm">
-              <Paperclip className="h-4 w-4" />
-              <span className="truncate">{draft.attachmentName ?? "Upload proof (medical, etc.)"}</span>
-              <input type="file" className="hidden" onChange={(e) => onAttachment(e.target.files?.[0] ?? null)} />
-            </label>
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">From</label>
-            <Input type="date" value={draft.fromDate} onChange={(e) => setDraft((d) => ({ ...d, fromDate: e.target.value }))} />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">To</label>
-            <Input type="date" value={draft.toDate} onChange={(e) => setDraft((d) => ({ ...d, toDate: e.target.value }))} />
-          </div>
-          <div className="md:col-span-2">
-            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Reason</label>
-            <textarea
-              rows={3}
-              className="w-full rounded-lg border border-border bg-card px-2 py-1.5 text-sm"
-              value={draft.reason}
-              onChange={(e) => setDraft((d) => ({ ...d, reason: e.target.value }))}
-              placeholder="Reason for leave..."
-            />
-          </div>
-        </div>
-        {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={() => applyLeave.mutate()} disabled={applyLeave.isPending}>
-            {applyLeave.isPending ? "Saving..." : draft.id ? "Update request" : "Apply leave"}
-          </Button>
-          {draft.id ? (
-            <Button type="button" variant="outline" onClick={() => setDraft(emptyDraft(defaultType))}>
-              Cancel edit
+          {formError ? <p className="text-sm text-destructive">{formError}</p> : null}
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => applyLeave.mutate()} disabled={applyLeave.isPending}>
+              {applyLeave.isPending ? "Saving..." : draft.id ? "Update request" : "Apply leave"}
             </Button>
-          ) : null}
-        </div>
-      </Card>
+            {draft.id ? (
+              <Button type="button" variant="outline" onClick={() => setDraft(emptyDraft(defaultType))}>
+                Cancel edit
+              </Button>
+            ) : null}
+          </div>
+        </Card>
+      ) : null}
 
       <Card className="space-y-3 p-4">
         <h3 className="text-base font-semibold text-foreground">Filters</h3>
@@ -265,25 +279,51 @@ export function LeaveManagementPage() {
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="space-y-2 p-4">
-          <h3 className="text-sm font-semibold text-foreground">Leave balance</h3>
-          <p className="text-xs text-muted-foreground">Current year (paid policy)</p>
-          <div className="grid grid-cols-3 gap-2 text-sm">
-            <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-2 py-1">
-              <p className="text-xs text-muted-foreground">Total</p>
-              <p className="font-semibold text-foreground">{leaveBalance.data?.total ?? 0}</p>
+        {canApplyLeave ? (
+          <Card className="space-y-2 p-4">
+            <h3 className="text-sm font-semibold text-foreground">Leave balance</h3>
+            <p className="text-xs text-muted-foreground">Current year (paid policy)</p>
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-2 py-1">
+                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="font-semibold text-foreground">{leaveBalance.data?.total ?? 0}</p>
+              </div>
+              <div className="rounded-lg border border-accent/25 bg-gradient-to-br from-accent/[0.09] to-card px-2 py-1">
+                <p className="text-xs text-muted-foreground">Used</p>
+                <p className="font-semibold text-foreground">{leaveBalance.data?.used ?? 0}</p>
+              </div>
+              <div className="rounded-lg border chip-success px-2 py-1">
+                <p className="text-xs text-muted-foreground">Remaining</p>
+                <p className="font-semibold text-foreground">{leaveBalance.data?.remaining ?? 0}</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-accent/25 bg-gradient-to-br from-accent/[0.09] to-card px-2 py-1">
-              <p className="text-xs text-muted-foreground">Used</p>
-              <p className="font-semibold text-foreground">{leaveBalance.data?.used ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Pending: {leaveBalance.data?.pending ?? 0} day(s)</p>
+          </Card>
+        ) : (
+          <Card className="space-y-2 p-4">
+            <h3 className="text-sm font-semibold text-foreground">Leave requests overview</h3>
+            <p className="text-xs text-muted-foreground">All employee requests</p>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-2 py-1">
+                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="font-semibold text-foreground">{reviewerSummary?.total ?? 0}</p>
+              </div>
+              <div className="rounded-lg border border-warning/25 bg-gradient-to-br from-warning/10 to-card px-2 py-1">
+                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="font-semibold text-foreground">{reviewerSummary?.pending ?? 0}</p>
+              </div>
+              <div className="rounded-lg border chip-success px-2 py-1">
+                <p className="text-xs text-muted-foreground">Approved</p>
+                <p className="font-semibold text-foreground">{reviewerSummary?.approved ?? 0}</p>
+              </div>
+              <div className="rounded-lg border chip-error px-2 py-1">
+                <p className="text-xs text-muted-foreground">Rejected</p>
+                <p className="font-semibold text-foreground">{reviewerSummary?.rejected ?? 0}</p>
+              </div>
             </div>
-            <div className="rounded-lg border chip-success px-2 py-1">
-              <p className="text-xs text-muted-foreground">Remaining</p>
-              <p className="font-semibold text-foreground">{leaveBalance.data?.remaining ?? 0}</p>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">Pending: {leaveBalance.data?.pending ?? 0} day(s)</p>
-        </Card>
+            <p className="text-xs text-muted-foreground">Cancelled: {reviewerSummary?.cancelled ?? 0}</p>
+          </Card>
+        )}
 
         <Card className="space-y-2 p-4 lg:col-span-2">
           <div className="flex items-center justify-between">
