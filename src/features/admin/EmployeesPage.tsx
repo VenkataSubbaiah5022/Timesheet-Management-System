@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { PencilLine, Search, Trash2, UserRoundPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiClient } from "../../services/api/client";
 import { useWorkspaceSettingsStore } from "../../services/workspaceSettingsStore";
 import { DataTable } from "../../shared/components/DataTable";
@@ -103,6 +104,10 @@ export function EmployeesPage() {
     },
     {
       header: "Actions",
+      meta: {
+        headerClassName: "sticky right-0 z-10 bg-secondary/90 backdrop-blur-sm",
+        cellClassName: "sticky right-0 z-10 bg-card",
+      },
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button
@@ -219,12 +224,48 @@ export function EmployeesPage() {
           </div>
         </div>
         {employees.isLoading ? (
-          <div className="rounded-lg border border-dashed border-border bg-card py-10 text-center text-sm text-muted-foreground">
-            Loading employee records...
+          <div className="space-y-2">
+            <Skeleton className="h-9 rounded-lg" />
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-11 rounded-lg" />
+            ))}
           </div>
         ) : (
           <>
-            <DataTable columns={columns} data={paginatedData} />
+            <DataTable
+              columns={columns}
+              data={paginatedData}
+              bulkActions={(selectedRows, clear) => (
+                <>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    onClick={async () => {
+                      await Promise.all(
+                        selectedRows.map((row) => apiClient.updateEmployeeStatus(row.id, "inactive"))
+                      );
+                      queryClient.invalidateQueries({ queryKey: ["employees"] });
+                      clear();
+                    }}
+                  >
+                    Mark Inactive
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    onClick={async () => {
+                      await Promise.all(
+                        selectedRows.map((row) => apiClient.updateEmployeeStatus(row.id, "active"))
+                      );
+                      queryClient.invalidateQueries({ queryKey: ["employees"] });
+                      clear();
+                    }}
+                  >
+                    Mark Active
+                  </Button>
+                </>
+              )}
+            />
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</p>
               <div className="flex gap-2">

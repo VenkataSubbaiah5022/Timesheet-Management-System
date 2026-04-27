@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarClock, Mail, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiClient } from "../../services/api/client";
 import { Card } from "../../shared/components/ui/card";
 import { money } from "../../shared/utils/calc";
@@ -42,6 +43,19 @@ export function ReportsPage() {
   const total = rows.reduce((sum, row) => sum + row.payableAmount, 0);
   const approvedCount = rows.filter((r) => r.approvalStatus === "approved").length;
   const pendingCount = rows.filter((r) => r.approvalStatus === "pending").length;
+
+  if (employees.isLoading || attendance.isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-32 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-44 rounded-xl" />
+          <Skeleton className="h-44 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   const downloadCsv = () => {
     const csv = Papa.unparse(

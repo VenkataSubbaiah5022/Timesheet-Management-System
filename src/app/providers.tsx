@@ -9,7 +9,9 @@ export function AppProviders({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={client}>
       <ThemeSync />
-      <TooltipProvider>{children}</TooltipProvider>
+      <TooltipProvider>
+        {children}
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

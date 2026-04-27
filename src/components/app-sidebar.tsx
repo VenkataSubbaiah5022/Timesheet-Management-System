@@ -149,7 +149,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const isRouteActive = (to: string) => location.pathname === to || location.pathname.startsWith(`${to}/`);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" variant="floating" className="pt-2">
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <ShieldUser className="h-5 w-5 text-sidebar-foreground/80" />
@@ -165,7 +165,12 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={`${section.label}-${item.label}`}>
-                    <SidebarMenuButton asChild isActive={isRouteActive(item.to)} tooltip={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isRouteActive(item.to)}
+                      tooltip={item.label}
+                      className="rounded-full border border-transparent data-[active=true]:border-primary/35 data-[active=true]:bg-primary/12 data-[active=true]:text-primary data-[active=true]:shadow-premium"
+                    >
                       <NavLink to={item.to}>
                         <item.icon className="h-4 w-4 shrink-0" />
                         {!collapsed && <span>{item.label}</span>}
@@ -185,7 +190,7 @@ export function AppSidebar({ onLogout }: { onLogout: () => void }) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="rounded-lg border border-sidebar-border/70 bg-sidebar-accent/35 p-2">
+        <div className="glass-panel rounded-xl border border-sidebar-border/70 p-2">
           {collapsed ? (
             <div className="flex flex-col items-center gap-2">
               <button

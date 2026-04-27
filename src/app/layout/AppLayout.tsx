@@ -7,10 +7,12 @@ import { SidebarInset, SidebarProvider, SidebarRail, SidebarTrigger } from "../.
 import { useAuthStore } from "../../features/auth/store";
 import { appBasePath } from "../../features/auth/routes";
 import { NotificationsContent } from "../../features/notifications/NotificationsContent";
+import { CommandPalette } from "../../features/command/CommandPalette";
 import { Bell } from "lucide-react";
 import { appendActivity } from "../../services/activityLog";
 
 type HeaderMeta = { title: string; subtitle: string };
+type Crumb = { label: string; href: string };
 
 function headerMeta(pathname: string): HeaderMeta {
   if (pathname.endsWith("/dashboard")) return { title: "Dashboard", subtitle: "Overview of timesheet and payroll" };
@@ -27,12 +29,26 @@ function headerMeta(pathname: string): HeaderMeta {
   return { title: "Workspace", subtitle: "Timesheet management operations" };
 }
 
+function breadcrumbs(pathname: string): Crumb[] {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length === 0) return [];
+  let acc = "";
+  return parts.map((part) => {
+    acc += `/${part}`;
+    const label = part
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return { label, href: acc };
+  });
+}
+
 export function AppLayout({ children }: PropsWithChildren) {
   const { user, setUser } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const meta = useMemo(() => headerMeta(location.pathname), [location.pathname]);
+  const crumbs = useMemo(() => breadcrumbs(location.pathname), [location.pathname]);
   const basePath = user ? appBasePath(user.role) : "/employee";
   const onLogout = () => {
     appendActivity({ action: "Signed out", detail: user?.email });
@@ -42,18 +58,40 @@ export function AppLayout({ children }: PropsWithChildren) {
 
   return (
     <SidebarProvider defaultOpen>
+      <CommandPalette />
       <AppSidebar onLogout={onLogout} />
       <SidebarRail />
       <SidebarInset className="bg-background">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/90 bg-card/95 px-4 py-3 shadow-sm backdrop-blur-sm md:px-6">
+        <header className="glass-header sticky top-0 z-20 flex items-center justify-between px-4 py-3 shadow-premium md:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="text-foreground" />
             <div className="min-w-0">
               <p className="truncate text-base font-semibold text-foreground">{meta.title}</p>
               <p className="truncate text-xs text-muted-foreground">{meta.subtitle}</p>
+              <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                {crumbs.map((c, idx) => (
+                  <span key={c.href} className="inline-flex items-center gap-1">
+                    {idx > 0 ? <span>/</span> : null}
+                    <span className="truncate">{c.label}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex"
+              aria-label="Search shortcut"
+              onClick={() => {
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+              }}
+            >
+              Search
+              <span className="ml-2 rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">K</span>
+            </Button>
             <Button
               type="button"
               variant="outline"
@@ -69,7 +107,9 @@ export function AppLayout({ children }: PropsWithChildren) {
           </div>
         </header>
         <main className="p-4 text-foreground md:p-6">
-          {children ?? <Outlet />}
+          <div key={location.pathname} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-300">
+            {children ?? <Outlet />}
+          </div>
         </main>
 
         <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>

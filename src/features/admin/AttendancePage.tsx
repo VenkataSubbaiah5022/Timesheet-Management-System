@@ -11,6 +11,7 @@ import { money } from "../../shared/utils/calc";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Card } from "../../shared/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function pill(label: string, tone: "default" | "success" | "warning" | "danger" | "muted") {
   const tones: Record<typeof tone, string> = {
@@ -149,6 +150,10 @@ export function AttendancePage() {
     },
     {
       header: "Actions",
+      meta: {
+        headerClassName: "sticky right-0 z-10 bg-secondary/90 backdrop-blur-sm",
+        cellClassName: "sticky right-0 z-10 bg-card",
+      },
       cell: ({ row }) => {
         const item = row.original;
         const isEditing = editingId === item.id;
@@ -299,8 +304,11 @@ export function AttendancePage() {
         </div>
 
         {attendance.isLoading ? (
-          <div className="rounded-lg border border-dashed border-border bg-card py-10 text-center text-sm text-muted-foreground">
-            Loading attendance records...
+          <div className="space-y-2">
+            <Skeleton className="h-9 rounded-lg" />
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-11 rounded-lg" />
+            ))}
           </div>
         ) : (
           <>

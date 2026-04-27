@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 import { apiClient } from "../../services/api/client";
 import { Card } from "../../shared/components/ui/card";
 import { money } from "../../shared/utils/calc";
@@ -81,6 +82,28 @@ export function AdminDashboardPage() {
   }));
 
   const pieColors = ["var(--accent)", "var(--info)", "var(--success)", "var(--warning)", "var(--sidebar-accent)"];
+  const tooltipCard = ({ label, value }: { label: string; value: string }) => (
+    <div className="glass-panel rounded-lg border px-3 py-2 shadow-premium">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-foreground">{value}</p>
+    </div>
+  );
+
+  if (employees.isLoading || attendance.isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <Skeleton key={idx} className="h-24 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Skeleton className="h-80 rounded-xl lg:col-span-2" />
+          <Skeleton className="h-80 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -150,11 +173,24 @@ export function AdminDashboardPage() {
           <h3 className="mb-3 font-semibold">Hours Trend</h3>
           <ResponsiveContainer width="100%" height="90%">
             <LineChart data={trendData}>
+              <defs>
+                <linearGradient id="hoursStroke" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0%" stopColor="var(--primary)" />
+                  <stop offset="100%" stopColor="var(--accent)" />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis dataKey="date" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
-              <Tooltip />
-              <Line type="monotone" dataKey="hours" stroke="var(--accent)" strokeWidth={3} dot={false} />
+              <Tooltip
+                cursor={{ stroke: "var(--border)" }}
+                content={({ active, payload, label }) =>
+                  active && payload?.length
+                    ? tooltipCard({ label: String(label), value: `${Number(payload[0]?.value ?? 0).toFixed(2)} hours` })
+                    : null
+                }
+              />
+              <Line type="monotone" dataKey="hours" stroke="url(#hoursStroke)" strokeWidth={3} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -168,7 +204,17 @@ export function AdminDashboardPage() {
                   <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v) => money(Number(v ?? 0))} />
+              <Tooltip
+                formatter={(v) => money(Number(v ?? 0))}
+                content={({ active, payload }) =>
+                  active && payload?.length
+                    ? tooltipCard({
+                        label: String(payload[0]?.name ?? "Value"),
+                        value: money(Number(payload[0]?.value ?? 0)),
+                      })
+                    : null
+                }
+              />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

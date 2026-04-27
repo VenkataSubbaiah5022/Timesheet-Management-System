@@ -28,97 +28,117 @@ body {
     --font-sans: 'Geist Variable', sans-serif;
   }
   :root {
-    --background: #f7f9fd;
-    --foreground: #101828;
-    --card: #ffffff;
-    --card-foreground: #101828;
-    --popover: #ffffff;
-    --popover-foreground: #101828;
-    --primary: #101828;
-    --primary-foreground: #ffffff;
-    --secondary: #eef2f7;
-    --secondary-foreground: #101828;
-    --muted: #f2f4f7;
-    --muted-foreground: #475467;
-    --accent: #ff6f61;
-    --accent-foreground: #ffffff;
-    --destructive: #d92d20;
-    --border: #d0d5dd;
-    --input: #d0d5dd;
-    --ring: #ff6f61;
-    --chart-1: #3b82f6;
-    --chart-2: #ff6f61;
-    --chart-3: #079455;
-    --chart-4: #ff9500;
-    --chart-5: #8b5cf6;
-    --success: #079455;
-    --warning: #ff9500;
-    --warning-ink: #b35f00;
-    --error: #d92d20;
-    --info: #3b82f6;
-    --success-soft-bg: #ecfdf3;
-    --success-soft-border: #abefc6;
-    --warning-soft-bg: #fff7ed;
-    --warning-soft-border: #fed7aa;
-    --error-soft-bg: #fef3f2;
-    --error-soft-border: #fecdca;
-    --info-soft-bg: #eff8ff;
-    --info-soft-border: #bfdbfe;
+    --background: rgb(247 248 255);
+    --foreground: rgb(24 24 43);
+    --card: rgb(255 255 255);
+    --card-foreground: rgb(24 24 43);
+    --popover: rgb(255 255 255);
+    --popover-foreground: rgb(24 24 43);
+    --primary: rgb(79 70 229);
+    --primary-foreground: rgb(255 255 255);
+    --secondary: rgb(238 242 255);
+    --secondary-foreground: rgb(49 46 129);
+    --muted: rgb(243 244 255);
+    --muted-foreground: rgb(92 95 122);
+    --accent: rgb(236 72 153);
+    --accent-foreground: rgb(255 255 255);
+    --destructive: rgb(220 38 38);
+    --border: rgb(221 225 241);
+    --input: rgb(216 220 238);
+    --ring: rgb(99 102 241);
+    --chart-1: rgb(79 70 229);
+    --chart-2: rgb(236 72 153);
+    --chart-3: rgb(20 184 166);
+    --chart-4: rgb(245 158 11);
+    --chart-5: rgb(168 85 247);
+    --success: rgb(22 163 74);
+    --warning: rgb(217 119 6);
+    --warning-ink: rgb(146 64 14);
+    --error: rgb(220 38 38);
+    --info: rgb(79 70 229);
+    --success-soft-bg: rgb(236 253 245);
+    --success-soft-border: rgb(167 243 208);
+    --warning-soft-bg: rgb(255 247 237);
+    --warning-soft-border: rgb(254 215 170);
+    --error-soft-bg: rgb(254 242 242);
+    --error-soft-border: rgb(254 202 202);
+    --info-soft-bg: rgb(238 242 255);
+    --info-soft-border: rgb(199 210 254);
+    --surface-low: rgb(250 251 255);
+    --surface-mid: rgb(244 246 255);
+    --surface-high: rgb(255 255 255);
+    --shadow-premium: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px rgb(79 70 229 / 0.08);
+    --shadow-premium-lg: 0 4px 8px rgb(15 23 42 / 0.08), 0 18px 42px rgb(79 70 229 / 0.14);
     --radius: 0.625rem;
-    --sidebar: #0f223f;
-    --sidebar-foreground: #f2f4f7;
-    --sidebar-primary: #ff6f61;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #112953;
-    --sidebar-accent-foreground: #f2f4f7;
-    --sidebar-border: #1d2939;
-    --sidebar-ring: #ff6f61;
+    --sidebar: rgb(248 248 255);
+    --sidebar-foreground: rgb(37 37 66);
+    --sidebar-primary: rgb(79 70 229);
+    --sidebar-primary-foreground: rgb(255 255 255);
+    --sidebar-accent: rgb(236 72 153);
+    --sidebar-accent-foreground: rgb(255 255 255);
+    --sidebar-border: rgb(224 228 245);
+    --sidebar-ring: rgb(79 70 229);
   }
   .dark {
-    --background: #0c111d;
-    --foreground: #f2f4f7;
-    --card: #111b29;
-    --card-foreground: #f2f4f7;
-    --popover: #111b29;
-    --popover-foreground: #f2f4f7;
-    --primary: #ff6f61;
-    --primary-foreground: #ffffff;
-    --secondary: #1d2939;
-    --secondary-foreground: #f2f4f7;
-    --muted: #1d2939;
-    --muted-foreground: #98a2b3;
-    --accent: #ef6051;
-    --accent-foreground: #ffffff;
-    --destructive: #ef4444;
-    --border: #344054;
-    --input: #344054;
-    --ring: #ff8f84;
-    --chart-1: #60a5fa;
-    --chart-2: #ff8f84;
-    --chart-3: #22c55e;
-    --chart-4: #f59e0b;
-    --chart-5: #a78bfa;
-    --success: #079455;
-    --warning: #ff9500;
-    --warning-ink: #b35f00;
-    --error: #d92d20;
-    --info: #3b82f6;
-    --success-soft-bg: #ecfdf3;
-    --success-soft-border: #abefc6;
-    --warning-soft-bg: #fff7ed;
-    --warning-soft-border: #fed7aa;
-    --error-soft-bg: #fef3f2;
-    --error-soft-border: #fecdca;
-    --info-soft-bg: #eff8ff;
-    --info-soft-border: #bfdbfe;
-    --sidebar: #0b1b34;
-    --sidebar-foreground: #f2f4f7;
-    --sidebar-primary: #ff6f61;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #112953;
-    --sidebar-accent-foreground: #f2f4f7;
-    --sidebar-border: #344054;
-    --sidebar-ring: #ff8f84;
+    --background: rgb(12 14 28);
+    --foreground: rgb(235 236 255);
+    --card: rgb(20 23 41);
+    --card-foreground: rgb(235 236 255);
+    --popover: rgb(20 23 41);
+    --popover-foreground: rgb(235 236 255);
+    --primary: rgb(129 140 248);
+    --primary-foreground: rgb(11 14 28);
+    --secondary: rgb(33 38 64);
+    --secondary-foreground: rgb(228 230 255);
+    --muted: rgb(33 38 64);
+    --muted-foreground: rgb(160 165 204);
+    --accent: rgb(244 114 182);
+    --accent-foreground: rgb(34 5 25);
+    --destructive: rgb(248 113 113);
+    --border: rgb(58 63 94);
+    --input: rgb(64 69 104);
+    --ring: rgb(129 140 248);
+    --chart-1: rgb(129 140 248);
+    --chart-2: rgb(244 114 182);
+    --chart-3: rgb(45 212 191);
+    --chart-4: rgb(251 191 36);
+    --chart-5: rgb(192 132 252);
+    --success: rgb(74 222 128);
+    --warning: rgb(251 191 36);
+    --warning-ink: rgb(146 64 14);
+    --error: rgb(248 113 113);
+    --info: rgb(129 140 248);
+    --success-soft-bg: rgb(20 83 45);
+    --success-soft-border: rgb(22 163 74);
+    --warning-soft-bg: rgb(120 53 15);
+    --warning-soft-border: rgb(245 158 11);
+    --error-soft-bg: rgb(127 29 29);
+    --error-soft-border: rgb(239 68 68);
+    --info-soft-bg: rgb(49 46 129);
+    --info-soft-border: rgb(99 102 241);
+    --surface-low: rgb(14 18 33);
+    --surface-mid: rgb(24 29 51);
+    --surface-high: rgb(33 38 64);
+    --shadow-premium: 0 1px 2px rgb(2 6 23 / 0.35), 0 10px 28px rgb(99 102 241 / 0.22);
+    --shadow-premium-lg: 0 6px 12px rgb(2 6 23 / 0.42), 0 22px 54px rgb(99 102 241 / 0.3);
+    --sidebar: rgb(14 18 33);
+    --sidebar-foreground: rgb(228 230 255);
+    --sidebar-primary: rgb(129 140 248);
+    --sidebar-primary-foreground: rgb(11 14 28);
+    --sidebar-accent: rgb(244 114 182);
+    --sidebar-accent-foreground: rgb(34 5 25);
+    --sidebar-border: rgb(58 63 94);
+    --sidebar-ring: rgb(129 140 248);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 30rem at 10% -10%, rgb(129 140 248 / 0.22), transparent 72%),
+      radial-gradient(56rem 28rem at 100% 0%, rgb(244 114 182 / 0.16), transparent 68%);
+    z-index: -1;
   }
   html {
     font-family: 'Geist Variable', Inter, "Segoe UI", sans-serif;
@@ -128,6 +148,38 @@ body {
 }
 
 @layer utilities {
+  .surface-low { background-color: var(--surface-low); }
+  .surface-mid { background-color: var(--surface-mid); }
+  .surface-high { background-color: var(--surface-high); }
+  .shadow-premium { box-shadow: var(--shadow-premium); }
+  .shadow-premium-lg { box-shadow: var(--shadow-premium-lg); }
+  .glass-panel {
+    background-color: color-mix(in srgb, var(--background) 76%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+    backdrop-filter: blur(20px);
+  }
+  .glass-header {
+    background-color: color-mix(in srgb, var(--card) 78%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    backdrop-filter: blur(16px);
+  }
+  .btn-gradient-primary {
+    background-image: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--accent) 36%, var(--primary)));
+    color: var(--primary-foreground);
+  }
+  .mesh-bg {
+    background-image:
+      radial-gradient(circle at 16% 18%, rgb(129 140 248 / 0.22), transparent 33%),
+      radial-gradient(circle at 84% 8%, rgb(244 114 182 / 0.18), transparent 30%),
+      linear-gradient(180deg, transparent, rgb(79 70 229 / 0.04));
+  }
+  .hover-lift {
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-premium-lg);
+  }
   .text-success { color: var(--success); }
   .text-warning { color: var(--warning); }
   .text-warning-ink { color: var(--warning-ink); }
@@ -139,4 +191,98 @@ body {
   .chip-warning { border-color: var(--warning-soft-border); background-color: var(--warning-soft-bg); color: var(--warning-ink); }
   .chip-error { border-color: var(--error-soft-border); background-color: var(--error-soft-bg); color: var(--error); }
   .chip-muted { border-color: var(--border); background-color: var(--secondary); color: var(--muted-foreground); }
+
+  .login-mesh-bg {
+    background:
+      radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 32%),
+      radial-gradient(circle at 82% 10%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 34%),
+      radial-gradient(circle at 72% 82%, color-mix(in srgb, var(--info) 24%, transparent), transparent 36%),
+      linear-gradient(145deg, color-mix(in srgb, var(--background) 88%, var(--primary) 12%), var(--background));
+  }
+  .login-noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.055;
+    background-image: radial-gradient(rgb(15 23 42 / 0.3) 0.5px, transparent 0.5px);
+    background-size: 3px 3px;
+  }
+  .login-orbit-mark {
+    position: absolute;
+    width: min(58vw, 30rem);
+    aspect-ratio: 1/1;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+    box-shadow: inset 0 0 0 28px color-mix(in srgb, var(--surface-mid) 65%, transparent);
+    opacity: 0.3;
+    mask-image: radial-gradient(circle at center, transparent 28%, black 29%, black 74%, transparent 76%);
+  }
+  .login-glass-card {
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(24px);
+    background: color-mix(in srgb, var(--card) 72%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+    box-shadow: 0 20px 50px rgb(2 6 23 / 0.24), 0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+  .login-glass-card::before {
+    content: "";
+    position: absolute;
+    inset: -140% auto -140% -30%;
+    width: 38%;
+    transform: rotate(14deg);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.18), transparent);
+    animation: loginShimmer 5.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .premium-input-wrap {
+    border-radius: 0.75rem;
+    padding: 1px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 72%, transparent), color-mix(in srgb, var(--accent) 72%, transparent));
+    transition: box-shadow 180ms ease, transform 180ms ease;
+  }
+  .premium-input-wrap:focus-within {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent);
+    transform: translateY(-1px);
+  }
+  .clock-loader {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 2px solid rgb(255 255 255 / 0.4);
+    border-top-color: rgb(255 255 255);
+    animation: spin 900ms linear infinite;
+  }
+  .btn-press {
+    transition: transform 120ms ease, filter 180ms ease, box-shadow 180ms ease;
+  }
+  .btn-press:hover { transform: translateY(-2px); filter: brightness(1.05); }
+  .btn-press:active { transform: translateY(0); box-shadow: inset 0 2px 6px rgb(15 23 42 / 0.25); }
+  .login-error-surface {
+    background: color-mix(in srgb, var(--error-soft-bg) 86%, transparent);
+    border: 1px solid color-mix(in srgb, var(--error-soft-border) 90%, transparent);
+    color: var(--error);
+  }
 }
+
+@keyframes loginShimmer {
+  0% { transform: translateX(-180%) rotate(14deg); }
+  42% { transform: translateX(320%) rotate(14deg); }
+  100% { transform: translateX(320%) rotate(14deg); }
+}
+
+@keyframes loginShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes checkDraw {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-login-shake { animation: loginShake 360ms ease; }
+.animate-check-draw { stroke-dasharray: 24; stroke-dashoffset: 24; animation: checkDraw 220ms ease forwards; }

@@ -10,6 +10,7 @@ import { money } from "../../shared/utils/calc";
 import { summarizeCalendarDay } from "../../shared/utils/shift";
 import type { AttendanceEntry } from "../../shared/types/domain";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function statusPill(label: string, tone: "default" | "success" | "warning" | "danger" | "muted") {
   const tones: Record<typeof tone, string> = {
@@ -170,7 +171,12 @@ export function MyTimesheetPage() {
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <h3 className="mb-3 text-sm font-semibold">Shift log</h3>
         {attendance.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading timesheet…</p>
+          <div className="space-y-2">
+            <Skeleton className="h-9 rounded-lg" />
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-11 rounded-lg" />
+            ))}
+          </div>
         ) : (
           <DataTable columns={columns} data={rows} />
         )}
