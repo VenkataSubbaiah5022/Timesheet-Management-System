@@ -6,7 +6,6 @@ import { appendActivity } from "../../services/activityLog";
 import { Button } from "../../shared/components/ui/button";
 import { Card } from "../../shared/components/ui/card";
 import { Input } from "../../shared/components/ui/input";
-import { ThemeToggle } from "../theme/ThemeToggle";
 import { roleHome } from "./routes";
 import { useAuthStore } from "./store";
 
@@ -26,9 +25,6 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="absolute right-4 top-4">
-        <ThemeToggle />
-      </div>
       <Card className="w-full max-w-md space-y-4">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Login</h2>

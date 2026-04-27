@@ -14,14 +14,14 @@ import { Card } from "../../shared/components/ui/card";
 
 function pill(label: string, tone: "default" | "success" | "warning" | "danger" | "muted") {
   const tones: Record<typeof tone, string> = {
-    default: "border-slate-200/90 bg-muted text-foreground dark:border-slate-800/50",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
-    danger: "border-destructive/30 bg-destructive/10 text-destructive",
-    muted: "border-slate-200/80 bg-background text-muted-foreground dark:border-slate-800/50",
+    default: "chip-info",
+    success: "chip-success",
+    warning: "chip-warning",
+    danger: "chip-error",
+    muted: "chip-muted",
   };
   return (
-    <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold", tones[tone])}>{label}</span>
+    <span className={cn("inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide", tones[tone])}>{label}</span>
   );
 }
 
@@ -138,13 +138,13 @@ export function AttendancePage() {
         if (isEditing) {
           return (
             <textarea
-              className="w-52 rounded-md border border-slate-300 p-2 text-xs"
+              className="w-52 rounded-md border border-border bg-card p-2 text-xs"
               value={editNotes}
               onChange={(e) => setEditNotes(e.target.value)}
             />
           );
         }
-        return <span className="text-xs text-slate-600">{row.original.notes || "—"}</span>;
+        return <span className="text-xs text-muted-foreground">{row.original.notes || "—"}</span>;
       },
     },
     {
@@ -156,11 +156,19 @@ export function AttendancePage() {
           <div className="flex flex-wrap gap-2">
             {isEditing ? (
               <>
-                <input className="rounded border px-2 py-1 text-xs" value={editClockIn} onChange={(e) => setEditClockIn(e.target.value)} />
-                <input className="rounded border px-2 py-1 text-xs" value={editClockOut} onChange={(e) => setEditClockOut(e.target.value)} />
+                <input
+                  className="rounded border border-border bg-card px-2 py-1 text-xs"
+                  value={editClockIn}
+                  onChange={(e) => setEditClockIn(e.target.value)}
+                />
+                <input
+                  className="rounded border border-border bg-card px-2 py-1 text-xs"
+                  value={editClockOut}
+                  onChange={(e) => setEditClockOut(e.target.value)}
+                />
                 <input
                   type="number"
-                  className="w-20 rounded border px-2 py-1 text-xs"
+                  className="w-20 rounded border border-border bg-card px-2 py-1 text-xs"
                   value={editBreak}
                   onChange={(e) => setEditBreak(Number(e.target.value))}
                 />
@@ -217,37 +225,37 @@ export function AttendancePage() {
       <Card className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">Attendance</h2>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <p className="text-slate-500">Open sessions</p>
-            <p className="font-semibold text-slate-900">{openCount}</p>
+          <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-3 py-2 text-sm">
+            <p className="text-muted-foreground">Open sessions</p>
+            <p className="font-semibold text-foreground">{openCount}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <p className="text-slate-500">Late clock-ins</p>
-            <p className="font-semibold text-rose-700">{lateCount}</p>
+          <div className="rounded-lg border chip-error px-3 py-2 text-sm">
+            <p className="text-muted-foreground">Late clock-ins</p>
+            <p className="font-semibold text-error">{lateCount}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <p className="text-slate-500">Present</p>
-            <p className="font-semibold text-emerald-700">{presentCount}</p>
+          <div className="rounded-lg border chip-success px-3 py-2 text-sm">
+            <p className="text-muted-foreground">Present</p>
+            <p className="font-semibold text-success">{presentCount}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <p className="text-slate-500">Half-day</p>
-            <p className="font-semibold text-amber-700">{halfDayCount}</p>
+          <div className="rounded-lg border chip-warning px-3 py-2 text-sm">
+            <p className="text-muted-foreground">Half-day</p>
+            <p className="font-semibold text-warning">{halfDayCount}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <p className="text-slate-500">Absent</p>
-            <p className="font-semibold text-slate-800">{absentCount}</p>
+          <div className="rounded-lg border border-border bg-secondary/65 px-3 py-2 text-sm">
+            <p className="text-muted-foreground">Absent</p>
+            <p className="font-semibold text-foreground">{absentCount}</p>
           </div>
         </div>
       </Card>
 
       <Card className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <div className="text-sm text-slate-600">
-            Showing <span className="font-semibold text-slate-900">{filteredRows.length}</span> attendance logs
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/80 bg-secondary/70 p-3">
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{filteredRows.length}</span> attendance logs
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 className="w-52 pl-8"
                 placeholder="Search employee..."
@@ -259,7 +267,7 @@ export function AttendancePage() {
               />
             </div>
             <select
-              className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-sm"
+              className="h-8 rounded-lg border border-border bg-card px-3 text-sm"
               value={employeeFilter}
               onChange={(e) => {
                 setEmployeeFilter(e.target.value);
@@ -274,7 +282,7 @@ export function AttendancePage() {
               ))}
             </select>
             <select
-              className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-sm"
+              className="h-8 rounded-lg border border-border bg-card px-3 text-sm"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as "all" | "present" | "half_day" | "in_progress" | "absent");
@@ -291,14 +299,14 @@ export function AttendancePage() {
         </div>
 
         {attendance.isLoading ? (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white py-10 text-center text-sm text-slate-500">
+          <div className="rounded-lg border border-dashed border-border bg-card py-10 text-center text-sm text-muted-foreground">
             Loading attendance records...
           </div>
         ) : (
           <>
             <DataTable columns={columns} data={rows} />
             <div className="mt-3 flex items-center justify-between">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}
               </p>
               <div className="flex gap-2">

@@ -3,6 +3,7 @@ import {
   defaultNotificationPrefs,
   type AttendanceEntry,
   type Employee,
+  type LeaveRequest,
   type Role,
   type User,
 } from "../../../shared/types/domain";
@@ -11,6 +12,7 @@ export interface MockDb {
   users: User[];
   employees: Employee[];
   attendance: AttendanceEntry[];
+  leaves: LeaveRequest[];
 }
 
 export const MOCK_DB_KEY = "timesheet-db-v2";
@@ -116,6 +118,38 @@ const seedDb: MockDb = {
       notes: "",
     },
   ],
+  leaves: [
+    {
+      id: "l-1",
+      employeeId: "e-1",
+      type: "Sick",
+      fromDate: dayjs().add(2, "day").startOf("day").toISOString(),
+      toDate: dayjs().add(3, "day").startOf("day").toISOString(),
+      reason: "Flu recovery and rest.",
+      attachmentName: "medical-note.pdf",
+      attachmentDataUrl: null,
+      status: "pending",
+      appliedAt: dayjs().subtract(1, "day").toISOString(),
+      updatedAt: dayjs().subtract(1, "day").toISOString(),
+      reviewedByUserId: null,
+      reviewerComment: "",
+    },
+    {
+      id: "l-2",
+      employeeId: "e-2",
+      type: "Annual",
+      fromDate: dayjs().subtract(10, "day").startOf("day").toISOString(),
+      toDate: dayjs().subtract(8, "day").startOf("day").toISOString(),
+      reason: "Family travel.",
+      attachmentName: null,
+      attachmentDataUrl: null,
+      status: "approved",
+      appliedAt: dayjs().subtract(15, "day").toISOString(),
+      updatedAt: dayjs().subtract(13, "day").toISOString(),
+      reviewedByUserId: "u-admin",
+      reviewerComment: "Approved. Enjoy your break.",
+    },
+  ],
 };
 
 function normalizeAttendance(entries: AttendanceEntry[]): AttendanceEntry[] {
@@ -125,6 +159,17 @@ function normalizeAttendance(entries: AttendanceEntry[]): AttendanceEntry[] {
     breakMinutes: typeof e.breakMinutes === "number" ? e.breakMinutes : 0,
     approvalStatus: e.approvalStatus ?? "pending",
     notes: e.notes ?? "",
+  }));
+}
+
+function normalizeLeaves(entries: LeaveRequest[]): LeaveRequest[] {
+  return entries.map((l) => ({
+    ...l,
+    attachmentName: l.attachmentName ?? null,
+    attachmentDataUrl: l.attachmentDataUrl ?? null,
+    status: l.status ?? "pending",
+    reviewedByUserId: l.reviewedByUserId ?? null,
+    reviewerComment: l.reviewerComment ?? "",
   }));
 }
 
@@ -141,6 +186,7 @@ export function readDb(): MockDb {
     const initial: MockDb = {
       ...seedDb,
       attendance: seedDb.attendance.map((a) => ({ ...a })),
+      leaves: seedDb.leaves.map((l) => ({ ...l })),
       users: seedDb.users.map((u) => ({ ...u, notificationPrefs: { ...u.notificationPrefs } })),
     };
     localStorage.setItem(MOCK_DB_KEY, JSON.stringify(initial));
@@ -148,6 +194,7 @@ export function readDb(): MockDb {
   }
   const parsed = JSON.parse(raw) as MockDb;
   parsed.attendance = normalizeAttendance(parsed.attendance ?? []);
+  parsed.leaves = normalizeLeaves(parsed.leaves ?? []);
   parsed.users = (parsed.users ?? []).map((u) => normalizeUserLoose(u as unknown as Record<string, unknown>));
   const merged = mergeMissingSeedUsers(parsed);
   if (merged !== parsed) writeDb(merged);

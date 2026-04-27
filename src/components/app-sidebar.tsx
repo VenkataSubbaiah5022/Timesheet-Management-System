@@ -4,6 +4,7 @@ import {
   BriefcaseBusiness,
   Clock3,
   LayoutDashboard,
+  LogOut,
   ReceiptText,
   ScrollText,
   Settings,
@@ -11,13 +12,14 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { appBasePath } from "../features/auth/routes";
 import { useAuthStore } from "../features/auth/store";
 import { selectUnreadCount, useNotificationsStore } from "../features/notifications/store";
 import { useWorkspaceSettingsStore } from "../services/workspaceSettingsStore";
 import type { Role } from "../shared/types/domain";
 import type { FeatureFlags } from "../shared/types/workspace";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -129,8 +131,9 @@ function navSections(role: Role, unread: number): MenuSection[] {
   ];
 }
 
-export function AppSidebar() {
+export function AppSidebar({ onLogout }: { onLogout: () => void }) {
   const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
   const location = useLocation();
   const unread = useNotificationsStore(selectUnreadCount);
   const features = useWorkspaceSettingsStore((s) => s.settings.features);
@@ -182,9 +185,58 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <p className="text-xs uppercase tracking-wide text-sidebar-foreground/60">
-          {collapsed ? user?.role?.slice(0, 1) : `${user?.role} panel`}
-        </p>
+        <div className="rounded-lg border border-sidebar-border/70 bg-sidebar-accent/35 p-2">
+          {collapsed ? (
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate(`${appBasePath(user?.role ?? "employee")}/profile`)}
+                className="flex size-8 items-center justify-center rounded-full border border-sidebar-border/70 bg-sidebar text-xs font-semibold text-sidebar-foreground"
+                aria-label="Open profile"
+              >
+                {(user?.name ?? "U")
+                  .split(/\s+/)
+                  .map((w) => w[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </button>
+              <Button type="button" size="icon-xs" variant="ghost" onClick={onLogout} aria-label="Logout">
+                <LogOut className="size-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-sidebar-border/70 bg-sidebar text-xs font-semibold text-sidebar-foreground">
+                  {user?.avatarDataUrl ? (
+                    <img src={user.avatarDataUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    (user?.name ?? "U")
+                      .split(/\s+/)
+                      .map((w) => w[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase()
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-sidebar-foreground">{user?.name}</p>
+                  <p className="text-[11px] uppercase tracking-wide text-sidebar-foreground/60">{user?.role}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                <Button type="button" size="xs" variant="ghost" onClick={() => navigate(`${appBasePath(user?.role ?? "employee")}/profile`)}>
+                  Profile
+                </Button>
+                <Button type="button" size="xs" variant="ghost" onClick={onLogout}>
+                  <LogOut className="mr-1 size-3.5" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

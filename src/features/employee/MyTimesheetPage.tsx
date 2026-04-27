@@ -13,14 +13,14 @@ import { cn } from "@/lib/utils";
 
 function statusPill(label: string, tone: "default" | "success" | "warning" | "danger" | "muted") {
   const tones: Record<typeof tone, string> = {
-    default: "border-slate-200/90 bg-muted text-foreground dark:border-slate-800/50",
-    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    warning: "border-amber-200 bg-amber-50 text-amber-900",
-    danger: "border-destructive/30 bg-destructive/10 text-destructive",
-    muted: "border-slate-200/80 bg-background text-muted-foreground dark:border-slate-800/50",
+    default: "chip-info",
+    success: "chip-success",
+    warning: "chip-warning",
+    danger: "chip-error",
+    muted: "chip-muted",
   };
   return (
-    <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold", tones[tone])}>
+    <span className={cn("inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide", tones[tone])}>
       {label}
     </span>
   );
@@ -71,7 +71,7 @@ export function MyTimesheetPage() {
       cell: ({ row }) => (
         <div className="text-xs leading-snug">
           <div className="font-medium text-foreground">{row.original.breakMinutes}m logged</div>
-          {row.original.onBreak && <div className="text-amber-700">{statusPill("On break", "warning")}</div>}
+          {row.original.onBreak && <div className="text-warning">{statusPill("On break", "warning")}</div>}
         </div>
       ),
     },
@@ -119,20 +119,20 @@ export function MyTimesheetPage() {
     <div className="space-y-4">
       <div className="flex gap-2">
         <button
-          className={cn("rounded-md border px-3 py-1.5 text-sm", viewMode === "weekly" ? "bg-slate-900 text-white" : "bg-white")}
+          className={cn("rounded-md border px-3 py-1.5 text-sm", viewMode === "weekly" ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}
           onClick={() => setViewMode("weekly")}
         >
           Weekly view
         </button>
         <button
-          className={cn("rounded-md border px-3 py-1.5 text-sm", viewMode === "monthly" ? "bg-slate-900 text-white" : "bg-white")}
+          className={cn("rounded-md border px-3 py-1.5 text-sm", viewMode === "monthly" ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}
           onClick={() => setViewMode("monthly")}
         >
           Monthly view
         </button>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-slate-200/90 bg-white dark:border-slate-800/50 dark:bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-accent/20 bg-gradient-to-br from-accent/[0.1] to-card p-4 shadow-sm">
           <p className="text-xs font-medium uppercase text-muted-foreground">Totals (this view)</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Hours <span className="font-semibold text-foreground tabular-nums">{totalHours.toFixed(2)}</span>
@@ -140,14 +140,14 @@ export function MyTimesheetPage() {
             Payable <span className="font-semibold text-foreground">{money(totalPayable)}</span>
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200/90 bg-white dark:border-slate-800/50 dark:bg-card p-4 shadow-sm">
+        <div className="rounded-xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card p-4 shadow-sm">
           <p className="text-xs font-medium uppercase text-muted-foreground">Daily view</p>
           <p className="mt-1 text-sm text-muted-foreground">Last 7 calendar days · weekends greyed when empty</p>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200/90 bg-white dark:border-slate-800/50 dark:bg-card shadow-sm">
-        <div className="border-b border-slate-200/90 bg-slate-50/80 px-4 py-3 dark:border-slate-800/50 dark:bg-muted/30">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border/80 bg-secondary/65 px-4 py-3">
           <h3 className="text-sm font-semibold">Daily status</h3>
         </div>
         <div className="divide-y divide-border">
@@ -167,7 +167,7 @@ export function MyTimesheetPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200/90 bg-white dark:border-slate-800/50 dark:bg-card p-4 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
         <h3 className="mb-3 text-sm font-semibold">Shift log</h3>
         {attendance.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading timesheet…</p>

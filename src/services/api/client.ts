@@ -3,6 +3,8 @@ import {
   defaultNotificationPrefs,
   type AttendanceEntry,
   type Employee,
+  type LeaveRow,
+  type LeaveStatus,
   type NotificationPrefs,
   type ProfilePayload,
   type SessionUser,
@@ -93,6 +95,49 @@ export interface AttendanceOverrideInput {
   clockOutAt: string | null;
   breakMinutes: number;
   notes: string;
+}
+
+export interface ApplyLeaveInput {
+  type: string;
+  fromDate: string;
+  toDate: string;
+  reason: string;
+  attachmentName?: string | null;
+  attachmentDataUrl?: string | null;
+}
+
+export interface ReviewLeaveInput {
+  leaveId: string;
+  status: "approved" | "rejected";
+  reviewerComment?: string;
+}
+
+function asDay(dateIso: string) {
+  return dayjs(dateIso).startOf("day");
+}
+
+function rangesOverlap(aFrom: string, aTo: string, bFrom: string, bTo: string): boolean {
+  const aS = asDay(aFrom);
+  const aE = asDay(aTo);
+  const bS = asDay(bFrom);
+  const bE = asDay(bTo);
+  return !(aE.isBefore(bS, "day") || bE.isBefore(aS, "day"));
+}
+
+function leaveDaysInclusive(fromDate: string, toDate: string): number {
+  return asDay(toDate).diff(asDay(fromDate), "day") + 1;
+}
+
+function mapLeaveRow(db: MockDb, leaveId: string): LeaveRow {
+  const leave = db.leaves.find((l) => l.id === leaveId);
+  if (!leave) throw new Error("Leave request not found");
+  const emp = db.employees.find((e) => e.id === leave.employeeId);
+  const user = emp ? db.users.find((u) => u.id === emp.userId) : null;
+  return {
+    ...leave,
+    employeeName: user?.name ?? leave.employeeId,
+    employeeUserId: user?.id ?? "",
+  };
 }
 
 export const apiClient = {
@@ -252,6 +297,7 @@ export const apiClient = {
     db.employees = db.employees.filter((e) => e.id !== employeeId);
     db.users = db.users.filter((u) => u.id !== employee.userId);
     db.attendance = db.attendance.filter((a) => a.employeeId !== employeeId);
+    db.leaves = db.leaves.filter((l) => l.employeeId !== employeeId);
     writeDb(db);
     appendActivity({
       action: "Employee removed",
@@ -405,5 +451,173 @@ export const apiClient = {
       detail: who,
       notify: { title: "Attendance overridden", body: who },
     });
+  },
+
+  async leaves(filters?: {
+    employeeName?: string;
+    status?: LeaveStatus | "all";
+    type?: string;
+    fromDate?: string;
+    toDate?: string;
+  }): Promise<LeaveRow[]> {
+    await wait();
+    const db = readDb();
+    const qEmp = filters?.employeeName?.trim().toLowerCase() ?? "";
+    const qType = filters?.type?.trim().toLowerCase() ?? "";
+    const from = filters?.fromDate ? asDay(filters.fromDate) : null;
+    const to = filters?.toDate ? asDay(filters.toDate) : null;
+    return db.leaves
+      .map((l) => mapLeaveRow(db, l.id))
+      .filter((row) => {
+        const empOk = !qEmp || row.employeeName.toLowerCase().includes(qEmp);
+        const statusOk = !filters?.status || filters.status === "all" ? true : row.status === filters.status;
+        const typeOk = !qType ? true : row.type.toLowerCase().includes(qType);
+        const date = asDay(row.fromDate);
+        const fromOk = from ? (date.isAfter(from, "day") || date.isSame(from, "day")) : true;
+        const toOk = to ? (date.isBefore(to, "day") || date.isSame(to, "day")) : true;
+        return empOk && statusOk && typeOk && fromOk && toOk;
+      })
+      .sort((a, b) => dayjs(b.appliedAt).valueOf() - dayjs(a.appliedAt).valueOf());
+  },
+
+  async myLeaves(userId: string): Promise<LeaveRow[]> {
+    await wait();
+    const db = readDb();
+    const emp = db.employees.find((e) => e.userId === userId);
+    if (!emp) return [];
+    return db.leaves
+      .filter((l) => l.employeeId === emp.id)
+      .map((l) => mapLeaveRow(db, l.id))
+      .sort((a, b) => dayjs(b.appliedAt).valueOf() - dayjs(a.appliedAt).valueOf());
+  },
+
+  async leaveBalance(userId: string): Promise<{ total: number; used: number; remaining: number; pending: number }> {
+    await wait();
+    const db = readDb();
+    const emp = db.employees.find((e) => e.userId === userId);
+    if (!emp) return { total: 0, used: 0, remaining: 0, pending: 0 };
+    const total = getWorkspaceSettings().leave.maxDaysPerYear;
+    const currentYear = dayjs().year();
+    const mine = db.leaves.filter((l) => l.employeeId === emp.id && dayjs(l.fromDate).year() === currentYear);
+    const used = mine.filter((l) => l.status === "approved").reduce((sum, l) => sum + leaveDaysInclusive(l.fromDate, l.toDate), 0);
+    const pending = mine.filter((l) => l.status === "pending").reduce((sum, l) => sum + leaveDaysInclusive(l.fromDate, l.toDate), 0);
+    return { total, used, remaining: Math.max(total - used, 0), pending };
+  },
+
+  async applyLeave(userId: string, input: ApplyLeaveInput): Promise<LeaveRow> {
+    await wait();
+    const db = readDb();
+    const emp = db.employees.find((e) => e.userId === userId);
+    if (!emp) throw new Error("Employee not found");
+    const fromDate = asDay(input.fromDate);
+    const toDate = asDay(input.toDate);
+    if (toDate.isBefore(fromDate, "day")) throw new Error("End date must be on or after start date.");
+    const type = input.type.trim();
+    if (!type) throw new Error("Select a leave type.");
+    const reason = input.reason.trim();
+    if (reason.length < 5) throw new Error("Please provide a short reason (min 5 chars).");
+    if ((input.attachmentDataUrl ?? "").length > 420_000) throw new Error("Attachment is too large for demo storage.");
+    const overlap = db.leaves.find(
+      (l) =>
+        l.employeeId === emp.id &&
+        (l.status === "pending" || l.status === "approved") &&
+        rangesOverlap(l.fromDate, l.toDate, fromDate.toISOString(), toDate.toISOString())
+    );
+    if (overlap) throw new Error("This request overlaps with an existing pending/approved leave.");
+    const now = dayjs().toISOString();
+    const leaveId = id("l");
+    db.leaves.push({
+      id: leaveId,
+      employeeId: emp.id,
+      type,
+      fromDate: fromDate.toISOString(),
+      toDate: toDate.toISOString(),
+      reason,
+      attachmentName: input.attachmentName ?? null,
+      attachmentDataUrl: input.attachmentDataUrl ?? null,
+      status: "pending",
+      appliedAt: now,
+      updatedAt: now,
+      reviewedByUserId: null,
+      reviewerComment: "",
+    });
+    writeDb(db);
+    const who = employeeDisplayName(db, emp.id);
+    appendActivity({
+      action: "Leave requested",
+      detail: `${who} · ${type}`,
+      notify: { title: "New leave request", body: `${who} submitted ${type} leave.` },
+    });
+    return mapLeaveRow(db, leaveId);
+  },
+
+  async updateLeave(userId: string, leaveId: string, input: ApplyLeaveInput): Promise<LeaveRow> {
+    await wait();
+    const db = readDb();
+    const emp = db.employees.find((e) => e.userId === userId);
+    if (!emp) throw new Error("Employee not found");
+    const leave = db.leaves.find((l) => l.id === leaveId && l.employeeId === emp.id);
+    if (!leave) throw new Error("Leave request not found");
+    if (leave.status !== "pending") throw new Error("Only pending requests can be edited.");
+    const fromDate = asDay(input.fromDate);
+    const toDate = asDay(input.toDate);
+    if (toDate.isBefore(fromDate, "day")) throw new Error("End date must be on or after start date.");
+    const overlap = db.leaves.find(
+      (l) =>
+        l.id !== leave.id &&
+        l.employeeId === emp.id &&
+        (l.status === "pending" || l.status === "approved") &&
+        rangesOverlap(l.fromDate, l.toDate, fromDate.toISOString(), toDate.toISOString())
+    );
+    if (overlap) throw new Error("This update overlaps with another pending/approved leave.");
+    leave.type = input.type.trim();
+    leave.fromDate = fromDate.toISOString();
+    leave.toDate = toDate.toISOString();
+    leave.reason = input.reason.trim();
+    leave.attachmentName = input.attachmentName ?? leave.attachmentName;
+    leave.attachmentDataUrl = input.attachmentDataUrl ?? leave.attachmentDataUrl;
+    leave.updatedAt = dayjs().toISOString();
+    writeDb(db);
+    appendActivity({ action: "Leave request updated", detail: `${employeeDisplayName(db, emp.id)} · ${leave.type}` });
+    return mapLeaveRow(db, leave.id);
+  },
+
+  async cancelLeave(userId: string, leaveId: string): Promise<void> {
+    await wait();
+    const db = readDb();
+    const emp = db.employees.find((e) => e.userId === userId);
+    if (!emp) throw new Error("Employee not found");
+    const leave = db.leaves.find((l) => l.id === leaveId && l.employeeId === emp.id);
+    if (!leave) throw new Error("Leave request not found");
+    if (leave.status !== "pending") throw new Error("Only pending requests can be cancelled.");
+    leave.status = "cancelled";
+    leave.updatedAt = dayjs().toISOString();
+    leave.reviewerComment = "Cancelled by employee.";
+    writeDb(db);
+    appendActivity({ action: "Leave request cancelled", detail: `${employeeDisplayName(db, emp.id)} · ${leave.type}` });
+  },
+
+  async reviewLeave(reviewerUserId: string, input: ReviewLeaveInput): Promise<LeaveRow> {
+    await wait();
+    const db = readDb();
+    const reviewer = db.users.find((u) => u.id === reviewerUserId);
+    if (!reviewer || (reviewer.role !== "admin" && reviewer.role !== "manager")) {
+      throw new Error("Only admin or manager can review leaves.");
+    }
+    const leave = db.leaves.find((l) => l.id === input.leaveId);
+    if (!leave) throw new Error("Leave request not found");
+    if (leave.status !== "pending") throw new Error("Only pending leave requests can be reviewed.");
+    leave.status = input.status;
+    leave.reviewedByUserId = reviewerUserId;
+    leave.reviewerComment = input.reviewerComment?.trim() ?? "";
+    leave.updatedAt = dayjs().toISOString();
+    writeDb(db);
+    const who = employeeDisplayName(db, leave.employeeId);
+    appendActivity({
+      action: `Leave ${input.status}`,
+      detail: `${who} · ${leave.type}`,
+      notify: { title: `Leave ${input.status}`, body: `${who}'s leave was ${input.status}.` },
+    });
+    return mapLeaveRow(db, leave.id);
   },
 };

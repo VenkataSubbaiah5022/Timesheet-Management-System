@@ -80,7 +80,7 @@ export function AdminDashboardPage() {
     value: Number(item.payable.toFixed(2)),
   }));
 
-  const pieColors = ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1"];
+  const pieColors = ["var(--accent)", "var(--info)", "var(--success)", "var(--warning)", "var(--sidebar-accent)"];
 
   return (
     <div className="space-y-4">
@@ -88,27 +88,27 @@ export function AdminDashboardPage() {
         <h2 className="text-lg font-semibold tracking-tight">Dashboard Filters</h2>
         <div className="grid gap-2 md:grid-cols-4">
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">From</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">From</label>
             <input
               type="date"
-              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">To</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">To</label>
             <input
               type="date"
-              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Employee</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Employee</label>
             <select
-              className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={employeeFilter}
               onChange={(e) => setEmployeeFilter(e.target.value)}
             >
@@ -120,17 +120,29 @@ export function AdminDashboardPage() {
               ))}
             </select>
           </div>
-          <div className="self-end text-sm text-slate-600">
-            Showing <span className="font-semibold text-slate-900">{filteredRows.length}</span> entries
+          <div className="self-end text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{filteredRows.length}</span> entries
           </div>
         </div>
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><p className="text-sm text-slate-500">Total Employees</p><p className="text-2xl font-bold">{employees.data?.length ?? 0}</p></Card>
-        <Card><p className="text-sm text-slate-500">Total Hours</p><p className="text-2xl font-bold">{totals.hours.toFixed(2)}</p></Card>
-        <Card><p className="text-sm text-slate-500">Total Payable</p><p className="text-2xl font-bold">{money(totals.payable)}</p></Card>
-        <Card><p className="text-sm text-slate-500">Overtime Hours</p><p className="text-2xl font-bold">{totals.overtimeHours.toFixed(2)}</p></Card>
+        <Card className="border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card">
+          <p className="text-sm text-muted-foreground">Total Employees</p>
+          <p className="text-2xl font-bold text-foreground">{employees.data?.length ?? 0}</p>
+        </Card>
+        <Card className="border-border bg-gradient-to-br from-secondary to-card">
+          <p className="text-sm text-muted-foreground">Total Hours</p>
+          <p className="text-2xl font-bold text-foreground">{totals.hours.toFixed(2)}</p>
+        </Card>
+        <Card className="border-accent/25 bg-gradient-to-br from-accent/[0.11] to-card">
+          <p className="text-sm text-muted-foreground">Total Payable</p>
+          <p className="text-2xl font-bold text-foreground">{money(totals.payable)}</p>
+        </Card>
+        <Card className="border-border bg-gradient-to-br from-secondary to-card">
+          <p className="text-sm text-muted-foreground">Overtime Hours</p>
+          <p className="text-2xl font-bold text-foreground">{totals.overtimeHours.toFixed(2)}</p>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -138,11 +150,11 @@ export function AdminDashboardPage() {
           <h3 className="mb-3 font-semibold">Hours Trend</h3>
           <ResponsiveContainer width="100%" height="90%">
             <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="date" stroke="var(--muted-foreground)" />
+              <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />
-              <Line type="monotone" dataKey="hours" stroke="#0f172a" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="hours" stroke="var(--accent)" strokeWidth={3} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -165,20 +177,20 @@ export function AdminDashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <p className="text-sm text-slate-500">Top Performer</p>
-          <p className="text-lg font-semibold text-slate-900">{topPerformer?.employee ?? "—"}</p>
-          <p className="text-xs text-slate-500">{topPerformer ? `${topPerformer.hours.toFixed(2)}h in selected period` : "No data for selected filters"}</p>
+          <p className="text-sm text-muted-foreground">Top Performer</p>
+          <p className="text-lg font-semibold text-foreground">{topPerformer?.employee ?? "—"}</p>
+          <p className="text-xs text-muted-foreground">{topPerformer ? `${topPerformer.hours.toFixed(2)}h in selected period` : "No data for selected filters"}</p>
         </Card>
         <Card>
-          <p className="text-sm text-slate-500">Overtime Cost</p>
-          <p className="text-lg font-semibold text-amber-700">{money(totals.overtimeCost)}</p>
-          <p className="text-xs text-slate-500">Calculated at 1.5x hourly rate above 8h/day</p>
+          <p className="text-sm text-muted-foreground">Overtime Cost</p>
+          <p className="text-lg font-semibold text-warning">{money(totals.overtimeCost)}</p>
+          <p className="text-xs text-muted-foreground">Calculated at 1.5x hourly rate above 8h/day</p>
         </Card>
         <Card>
-          <p className="text-sm text-slate-500">Cost Breakdown</p>
-          <p className="text-xs text-slate-500 mt-1">Regular: <span className="font-semibold text-slate-900">{money(regularCost)}</span></p>
-          <p className="text-xs text-slate-500">Overtime: <span className="font-semibold text-slate-900">{money(totals.overtimeCost)}</span></p>
-          <p className="text-xs text-slate-500">Total: <span className="font-semibold text-slate-900">{money(totals.payable)}</span></p>
+          <p className="text-sm text-muted-foreground">Cost Breakdown</p>
+          <p className="text-xs text-muted-foreground mt-1">Regular: <span className="font-semibold text-foreground">{money(regularCost)}</span></p>
+          <p className="text-xs text-muted-foreground">Overtime: <span className="font-semibold text-foreground">{money(totals.overtimeCost)}</span></p>
+          <p className="text-xs text-muted-foreground">Total: <span className="font-semibold text-foreground">{money(totals.payable)}</span></p>
         </Card>
       </div>
     </div>

@@ -51,6 +51,24 @@ export interface AttendanceEntry {
   notes: string;
 }
 
+export type LeaveStatus = "pending" | "approved" | "rejected" | "cancelled";
+
+export interface LeaveRequest {
+  id: string;
+  employeeId: string;
+  type: string;
+  fromDate: string;
+  toDate: string;
+  reason: string;
+  attachmentName: string | null;
+  attachmentDataUrl: string | null;
+  status: LeaveStatus;
+  appliedAt: string;
+  updatedAt: string;
+  reviewedByUserId: string | null;
+  reviewerComment: string;
+}
+
 export interface SessionUser {
   id: string;
   name: string;
@@ -66,4 +84,9 @@ export interface SessionUser {
 export interface ProfilePayload extends SessionUser {
   employeeJoinedAt: string | null;
   hourlyRate: number | null;
+}
+
+export interface LeaveRow extends LeaveRequest {
+  employeeName: string;
+  employeeUserId: string;
 }

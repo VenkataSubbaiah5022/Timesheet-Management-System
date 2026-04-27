@@ -207,7 +207,7 @@ export function ProfilePage() {
       <Card className="space-y-4 p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="relative shrink-0">
-            <div className="flex size-24 items-center justify-center overflow-hidden rounded-full border border-slate-200/90 bg-slate-100 text-lg font-semibold text-slate-600 dark:border-slate-800/50 dark:bg-muted dark:text-muted-foreground">
+            <div className="flex size-24 items-center justify-center overflow-hidden rounded-full border border-border bg-secondary text-lg font-semibold text-foreground">
               {p.avatarDataUrl ? (
                 <img src={p.avatarDataUrl} alt="" className="size-full object-cover" />
               ) : (
@@ -219,7 +219,7 @@ export function ProfilePage() {
                   .toUpperCase()
               )}
             </div>
-            <label className="absolute -bottom-1 -right-1 flex size-9 cursor-pointer items-center justify-center rounded-full border border-slate-200/90 bg-white shadow-sm dark:border-slate-800/50 dark:bg-card">
+            <label className="absolute -bottom-1 -right-1 flex size-9 cursor-pointer items-center justify-center rounded-full border border-border bg-card shadow-sm">
               <Camera className="size-4 text-foreground" />
               <input
                 type="file"
@@ -259,13 +259,13 @@ export function ProfilePage() {
         <div>
           <h3 className="text-sm font-medium text-foreground">Activity summary</h3>
           <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-800/50 dark:bg-muted/40">
+            <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-3 py-2">
               <dt className="text-xs font-medium uppercase text-muted-foreground">Last sign-in</dt>
               <dd className="text-sm font-medium text-foreground">
                 {p.lastLoginAt ? dayjs(p.lastLoginAt).format("MMM D, YYYY h:mm A") : "—"}
               </dd>
             </div>
-            <div className="rounded-lg border border-slate-200/80 bg-slate-50/80 px-3 py-2 dark:border-slate-800/50 dark:bg-muted/40">
+            <div className="rounded-lg border border-accent/25 bg-gradient-to-br from-accent/[0.1] to-card px-3 py-2">
               <dt className="text-xs font-medium uppercase text-muted-foreground">Actions (7 days)</dt>
               <dd className="text-sm font-medium text-foreground">{weeklyCount} logged</dd>
             </div>
@@ -370,7 +370,7 @@ export function ProfilePage() {
           {changePassword.isError ? (
             <p className="text-sm text-destructive">{(changePassword.error as Error).message}</p>
           ) : null}
-          {passwordToast ? <p className="text-sm text-emerald-600 dark:text-emerald-400">Password updated.</p> : null}
+          {passwordToast ? <p className="text-sm text-success">Password updated.</p> : null}
           <Button type="submit" variant="secondary" disabled={changePassword.isPending || !passwordForm.formState.isDirty}>
             {changePassword.isPending ? "Updating…" : "Update password"}
           </Button>
@@ -387,7 +387,7 @@ export function ProfilePage() {
           {(["emailApprovals", "emailWeeklyDigest", "pushBrowser"] as const).map((key) => (
             <label
               key={key}
-              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-slate-50/50 px-3 py-2 dark:border-slate-800/50 dark:bg-muted/30"
+              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border/80 bg-secondary/55 px-3 py-2"
             >
               <span className="text-sm text-foreground">
                 {key === "emailApprovals" && "Email when timesheets need approval"}
@@ -396,7 +396,7 @@ export function ProfilePage() {
               </span>
               <input
                 type="checkbox"
-                className="size-4 rounded border-slate-300 text-primary accent-primary dark:border-slate-600"
+                className="size-4 rounded border-border text-primary accent-primary"
                 checked={prefsForm.watch(key)}
                 onChange={(e) => prefsForm.setValue(key, e.target.checked, { shouldDirty: true })}
               />
@@ -412,7 +412,7 @@ export function ProfilePage() {
 
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-foreground">Session management</h3>
-          <div className="flex items-start gap-3 rounded-lg border border-slate-200/80 bg-slate-50/50 px-3 py-2 dark:border-slate-800/50 dark:bg-muted/30">
+          <div className="flex items-start gap-3 rounded-lg border border-border/80 bg-secondary/55 px-3 py-2">
             <Smartphone className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <div className="min-w-0 text-sm">
               <p className="font-medium text-foreground">This device</p>
@@ -430,7 +430,7 @@ export function ProfilePage() {
       </Card>
 
       {dirty ? (
-        <p className="text-center text-xs text-amber-700 dark:text-amber-400">You have unsaved changes. Save or confirm before leaving.</p>
+        <p className="text-center text-xs text-warning">You have unsaved changes. Save or confirm before leaving.</p>
       ) : null}
     </div>
   );

@@ -78,35 +78,33 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-4">
-      {mockMessage && (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{mockMessage}</div>
-      )}
+      {mockMessage && <div className="chip-success rounded-lg border px-3 py-2 text-sm">{mockMessage}</div>}
 
       <Card className="space-y-3">
         <h3 className="font-semibold">Report Filters</h3>
         <div className="grid gap-2 md:grid-cols-5">
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">From</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">From</label>
             <input
               type="date"
-              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">To</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">To</label>
             <input
               type="date"
-              className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Employee</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Employee</label>
             <select
-              className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm"
+              className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
               value={employeeFilter}
               onChange={(e) => setEmployeeFilter(e.target.value)}
             >
@@ -119,9 +117,9 @@ export function ReportsPage() {
             </select>
           </div>
           <div className="md:col-span-2">
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Quick Search</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Quick Search</label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2 h-4 w-4 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2 top-2 h-4 w-4 text-muted-foreground" />
               <Input className="h-8 pl-8" placeholder="Search employee..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
@@ -131,17 +129,17 @@ export function ReportsPage() {
       <Card className="space-y-3">
         <h3 className="font-semibold">Download Reports</h3>
         <div className="grid gap-2 sm:grid-cols-3 text-sm">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-slate-500">Matched Entries</p>
-            <p className="font-semibold text-slate-900">{rows.length}</p>
+          <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card px-3 py-2">
+            <p className="text-muted-foreground">Matched Entries</p>
+            <p className="font-semibold text-foreground">{rows.length}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-slate-500">Approved / Pending</p>
-            <p className="font-semibold text-slate-900">{approvedCount} / {pendingCount}</p>
+          <div className="rounded-lg border border-accent/25 bg-gradient-to-br from-accent/[0.1] to-card px-3 py-2">
+            <p className="text-muted-foreground">Approved / Pending</p>
+            <p className="font-semibold text-foreground">{approvedCount} / {pendingCount}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <p className="text-slate-500">Total Payable</p>
-            <p className="font-semibold text-slate-900">{money(total)}</p>
+          <div className="rounded-lg border chip-success px-3 py-2">
+            <p className="text-muted-foreground">Total Payable</p>
+            <p className="font-semibold text-foreground">{money(total)}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -155,9 +153,9 @@ export function ReportsPage() {
           <h3 className="font-semibold flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Scheduled Reports (Mock)</h3>
           <div className="grid gap-2 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Frequency</label>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Frequency</label>
               <select
-                className="h-8 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm"
+                className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
                 value={scheduleFrequency}
                 onChange={(e) => setScheduleFrequency(e.target.value as "weekly" | "monthly")}
               >
@@ -166,10 +164,10 @@ export function ReportsPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Time</label>
+              <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Time</label>
               <input
                 type="time"
-                className="h-8 w-full rounded-lg border border-slate-300 px-2 text-sm"
+                className="h-8 w-full rounded-lg border border-border bg-card px-2 text-sm"
                 value={scheduleTime}
                 onChange={(e) => setScheduleTime(e.target.value)}
               />
@@ -189,11 +187,11 @@ export function ReportsPage() {
         <Card className="space-y-3">
           <h3 className="font-semibold flex items-center gap-2"><Mail className="h-4 w-4" /> Email Report (Mock)</h3>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Recipient Email</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Recipient Email</label>
             <Input className="h-8" value={emailTo} onChange={(e) => setEmailTo(e.target.value)} />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Subject</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-muted-foreground">Subject</label>
             <Input className="h-8" value={emailSubject} onChange={(e) => setEmailSubject(e.target.value)} />
           </div>
           <Button

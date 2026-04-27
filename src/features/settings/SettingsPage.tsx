@@ -14,7 +14,6 @@ import { useWorkspaceSettingsStore } from "../../services/workspaceSettingsStore
 import { mergeWorkspaceSettings, type WorkspaceSettings } from "../../shared/types/workspace";
 import { Card } from "../../shared/components/ui/card";
 import { useAuthStore } from "../auth/store";
-import { ThemeToggle } from "../theme/ThemeToggle";
 import { COMMON_TIMEZONES } from "./commonTimezones";
 import { settingsSchema, toWorkspaceSettings, type WorkspaceFormValues } from "./settingsSchema";
 
@@ -138,20 +137,11 @@ export function SettingsPage() {
         <h1 className="text-xl font-semibold text-foreground">Settings</h1>
         <p className="text-sm text-muted-foreground">Workspace policies, appearance, and operational toggles.</p>
         {!canEditWorkspace ? (
-          <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
+          <p className="mt-2 text-xs text-warning">
             Organization policies are read-only. You can still use appearance, personal export, and environment info below.
           </p>
         ) : null}
       </div>
-
-      <Card className="space-y-4 p-5">
-        <h2 className="text-sm font-medium text-foreground">Appearance</h2>
-        <p className="text-xs text-muted-foreground">Syncs with the header toggle and is stored in this browser.</p>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <span className="text-sm text-muted-foreground">Light / dark theme</span>
-        </div>
-      </Card>
 
       <form className="space-y-6" onSubmit={onSave}>
         <Card className="space-y-4 p-5">
@@ -182,7 +172,7 @@ export function SettingsPage() {
           <h2 className="text-sm font-medium text-foreground">Timezone</h2>
           <select
             disabled={disabled}
-            className="h-8 w-full max-w-md rounded-lg border border-slate-300 bg-white px-2 text-sm dark:border-slate-600 dark:bg-input/30"
+            className="h-8 w-full max-w-md rounded-lg border border-border bg-card px-2 text-sm"
             {...form.register("timezone")}
           >
             {zoneOptions.map((tz) => (
@@ -240,7 +230,7 @@ export function SettingsPage() {
             <textarea
               disabled={disabled}
               rows={4}
-              className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-foreground outline-none dark:border-slate-600 dark:bg-input/30"
+              className="w-full rounded-lg border border-border bg-card px-2.5 py-2 text-sm text-foreground outline-none"
               value={form.watch("leave.types").join("\n")}
               onChange={(e) => {
                 const types = e.target.value
@@ -262,13 +252,13 @@ export function SettingsPage() {
           {(["moduleDashboard", "moduleEmployees", "moduleAttendance", "moduleLeaves", "moduleReports", "moduleActivityLog"] as const).map((key) => (
             <label
               key={key}
-              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200/80 bg-slate-50/50 px-3 py-2 dark:border-slate-800/50 dark:bg-muted/30"
+              className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border/80 bg-secondary/55 px-3 py-2"
             >
               <span className="text-sm capitalize text-foreground">{key.replace("module", "").replace(/([A-Z])/g, " $1")}</span>
               <input
                 type="checkbox"
                 disabled={disabled || key === "moduleDashboard"}
-                className="size-4 rounded border-slate-300 accent-primary dark:border-slate-600"
+                className="size-4 rounded border-border accent-primary"
                 checked={form.watch(`features.${key}`)}
                 onChange={(e) => form.setValue(`features.${key}`, e.target.checked, { shouldDirty: true })}
               />
@@ -282,7 +272,7 @@ export function SettingsPage() {
         <Card className="space-y-4 p-5">
           <h2 className="text-sm font-medium text-foreground">Workspace notifications</h2>
           <p className="text-xs text-muted-foreground">Channel preferences for payroll digests and in-app alerts (mock).</p>
-          <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200/80 px-3 py-2 dark:border-slate-800/50">
+          <label className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
             <span className="text-sm text-foreground">Email payroll digest</span>
             <input
               type="checkbox"
@@ -292,7 +282,7 @@ export function SettingsPage() {
               onChange={(e) => form.setValue("workspaceNotifications.emailPayrollDigest", e.target.checked, { shouldDirty: true })}
             />
           </label>
-          <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200/80 px-3 py-2 dark:border-slate-800/50">
+          <label className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
             <span className="text-sm text-foreground">In-app approval alerts</span>
             <input
               type="checkbox"
@@ -307,11 +297,11 @@ export function SettingsPage() {
         <Card className="space-y-4 p-5">
           <h2 className="text-sm font-medium text-foreground">Environment (API-ready)</h2>
           <dl className="grid gap-2 text-sm">
-            <div className="flex justify-between gap-4 border-b border-slate-100 py-1 dark:border-slate-800/50">
+            <div className="flex justify-between gap-4 border-b border-border/70 py-1">
               <dt className="text-muted-foreground">Mode</dt>
               <dd className="font-mono text-foreground">{env.mode}</dd>
             </div>
-            <div className="flex justify-between gap-4 border-b border-slate-100 py-1 dark:border-slate-800/50">
+            <div className="flex justify-between gap-4 border-b border-border/70 py-1">
               <dt className="text-muted-foreground">VITE_API_BASE_URL</dt>
               <dd className="max-w-[55%] truncate font-mono text-xs text-foreground">{env.apiBaseUrl || "(empty)"}</dd>
             </div>
@@ -320,7 +310,7 @@ export function SettingsPage() {
               <dd className="text-foreground">{env.useMockDataLayer ? "Mock (local)" : "Live (when wired)"}</dd>
             </div>
           </dl>
-          <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200/80 px-3 py-2 dark:border-slate-800/50">
+          <label className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2">
             <span className="text-sm text-foreground">Prefer live API when URL is configured</span>
             <input
               type="checkbox"
@@ -396,7 +386,7 @@ export function SettingsPage() {
           </Button>
         </div>
         {restoreError ? <p className="text-sm text-destructive">{restoreError}</p> : null}
-        {backupMsg ? <p className="text-sm text-emerald-700 dark:text-emerald-400">{backupMsg}</p> : null}
+        {backupMsg ? <p className="text-sm text-success">{backupMsg}</p> : null}
         {importBackup.isError ? <p className="text-sm text-destructive">{(importBackup.error as Error).message}</p> : null}
       </Card>
     </div>

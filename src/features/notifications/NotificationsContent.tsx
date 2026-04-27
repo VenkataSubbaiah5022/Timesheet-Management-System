@@ -40,8 +40,8 @@ function NotificationRow({ n, onRead }: { n: InAppNotification; onRead: () => vo
   return (
     <li
       className={cn(
-        "rounded-lg border border-slate-200/80 bg-white p-3 text-sm shadow-sm transition-colors dark:border-slate-800/50 dark:bg-card",
-        !n.read && "border-primary/20 bg-primary/[0.04] dark:border-primary/25 dark:bg-primary/10"
+        "rounded-lg border border-border bg-card p-3 text-sm shadow-sm transition-colors",
+        !n.read && "border-accent/35 bg-accent/[0.08]"
       )}
     >
       <div className="flex items-start justify-between gap-2">

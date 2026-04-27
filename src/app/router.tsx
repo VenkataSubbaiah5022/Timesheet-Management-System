@@ -10,10 +10,10 @@ import { ClockPage } from "../features/employee/ClockPage";
 import { MyTimesheetPage } from "../features/employee/MyTimesheetPage";
 import { NotificationsPage } from "../features/notifications/NotificationsPage";
 import { ProfilePage } from "../features/profile/ProfilePage";
+import { LeaveManagementPage } from "../features/leaves/LeaveManagementPage";
 import { FeatureGate } from "../features/settings/FeatureGate";
 import { SettingsPage } from "../features/settings/SettingsPage";
 import { ActivityLogsPage } from "../features/shared/ActivityLogsPage";
-import { SimpleInfoPage } from "../features/shared/SimpleInfoPage";
 
 const adminShell = (
   <ProtectedRoute roles={["admin"]}>
@@ -83,7 +83,7 @@ export const router = createBrowserRouter([
         path: "leaves",
         element: (
           <FeatureGate feature="moduleLeaves">
-            <SimpleInfoPage title="Leave Management" description="Approve or reject employee leave requests, and monitor upcoming absences." />
+            <LeaveManagementPage />
           </FeatureGate>
         ),
       },
@@ -133,7 +133,7 @@ export const router = createBrowserRouter([
         path: "leaves",
         element: (
           <FeatureGate feature="moduleLeaves">
-            <SimpleInfoPage title="Leave Management" description="Review team leave requests and upcoming absences." />
+            <LeaveManagementPage />
           </FeatureGate>
         ),
       },
@@ -153,7 +153,7 @@ export const router = createBrowserRouter([
         path: "leaves",
         element: (
           <FeatureGate feature="moduleLeaves">
-            <SimpleInfoPage title="Leave Management" description="Apply for leave, view request history, and track approval status." />
+            <LeaveManagementPage />
           </FeatureGate>
         ),
       },

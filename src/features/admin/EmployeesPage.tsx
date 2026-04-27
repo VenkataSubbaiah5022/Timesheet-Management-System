@@ -86,14 +86,14 @@ export function EmployeesPage() {
   const columns: ColumnDef<EmployeeListRow>[] = [
     { header: "Name", accessorKey: "name" },
     { header: "Email", accessorKey: "email" },
-    { header: "Hourly Rate", cell: ({ row }) => <span className="font-medium text-slate-700">INR {row.original.hourlyRate}</span> },
+    { header: "Hourly Rate", cell: ({ row }) => <span className="font-medium text-foreground">INR {row.original.hourlyRate}</span> },
     {
       header: "Status",
       cell: ({ row }) => (
         <Button
           size="sm"
           variant="outline"
-          className={`rounded-full border ${row.original.status === "active" ? "border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+          className={`rounded-full border ${row.original.status === "active" ? "chip-success hover:opacity-90" : "chip-muted hover:opacity-90"}`}
           onClick={() => updateStatus.mutate({ id: row.original.id, status: row.original.status === "active" ? "inactive" : "active" })}
           disabled={updateStatus.isPending}
         >
@@ -146,8 +146,8 @@ export function EmployeesPage() {
         <div
           className={`rounded-lg border px-3 py-2 text-sm ${
             feedback.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-rose-200 bg-rose-50 text-rose-700"
+              ? "chip-success"
+              : "chip-error"
           }`}
         >
           {feedback.message}
@@ -158,7 +158,7 @@ export function EmployeesPage() {
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">{editingId ? "Edit Employee" : "Add Employee"}</h3>
           {!editingId && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600">
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-xs text-accent">
               <UserRoundPlus className="h-3.5 w-3.5" /> New employee
             </span>
           )}
@@ -167,7 +167,7 @@ export function EmployeesPage() {
           <Input required placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <Input required type="number" placeholder="Hourly Rate" value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} />
-          <select className="rounded-md border border-slate-300 px-3 py-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value as "active" | "inactive")}>
+          <select className="rounded-md border border-border bg-card px-3 py-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value as "active" | "inactive")}>
             <option value="active">active</option>
             <option value="inactive">inactive</option>
           </select>
@@ -193,19 +193,19 @@ export function EmployeesPage() {
       </Card>
 
       <Card className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <div className="text-sm text-slate-600">
-            Showing <span className="font-semibold text-slate-900">{filteredData.length}</span> employees •
-            Active <span className="font-semibold text-emerald-700">{activeCount}</span> •
-            Inactive <span className="font-semibold text-slate-700">{inactiveCount}</span>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/80 bg-secondary/70 p-3">
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{filteredData.length}</span> employees •
+            Active <span className="font-semibold text-success">{activeCount}</span> •
+            Inactive <span className="font-semibold text-foreground">{inactiveCount}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input className="w-56 pl-8" placeholder="Search name or email..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
             </div>
             <select
-              className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-sm"
+              className="h-8 rounded-lg border border-border bg-card px-3 text-sm"
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as "all" | "active" | "inactive");
@@ -219,14 +219,14 @@ export function EmployeesPage() {
           </div>
         </div>
         {employees.isLoading ? (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white py-10 text-center text-sm text-slate-500">
+          <div className="rounded-lg border border-dashed border-border bg-card py-10 text-center text-sm text-muted-foreground">
             Loading employee records...
           </div>
         ) : (
           <>
             <DataTable columns={columns} data={paginatedData} />
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-500">Page {currentPage} of {totalPages}</p>
+              <p className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</p>
               <div className="flex gap-2">
                 <Button variant="outline" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                 <Button variant="outline" disabled={currentPage >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>

@@ -39,7 +39,7 @@ export function ClockPage() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-slate-200/90 bg-white dark:border-slate-800/50 dark:bg-card p-5 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Time clock</h2>
@@ -49,7 +49,7 @@ export function ClockPage() {
               {rt.autoClockoutHours}h open
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200/80 bg-slate-50/80 dark:border-slate-800/50 dark:bg-muted/40 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 rounded-lg border border-border/80 bg-secondary/70 px-3 py-2 text-sm">
             <Timer className="size-4 text-muted-foreground" />
             <span className="font-medium tabular-nums">{dayjs().format("DD MMM YYYY, hh:mm:ss A")}</span>
           </div>
@@ -57,22 +57,22 @@ export function ClockPage() {
 
         {open && (
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-slate-200/80 bg-white dark:border-slate-800/50 dark:bg-background p-3">
+            <div className="rounded-lg border border-primary/15 bg-gradient-to-br from-primary/[0.04] to-card p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">Session</p>
               <p className="mt-1 text-sm font-semibold">{onBreak ? "On break" : "Working"}</p>
               <p className="text-xs text-muted-foreground">In since {dayjs(open.clockInAt).format("hh:mm A")}</p>
             </div>
-            <div className="rounded-lg border border-slate-200/80 bg-white dark:border-slate-800/50 dark:bg-background p-3">
+            <div className="rounded-lg border border-accent/25 bg-gradient-to-br from-accent/[0.1] to-card p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">Live net hours</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{open.workedHours.toFixed(2)}</p>
               <p className="text-xs text-muted-foreground">Break bank {open.breakMinutes}m logged</p>
             </div>
-            <div className="rounded-lg border border-slate-200/80 bg-white dark:border-slate-800/50 dark:bg-background p-3">
+            <div className="rounded-lg border chip-success p-3">
               <p className="text-xs font-medium uppercase text-muted-foreground">Punctuality</p>
               <p
                 className={cn(
                   "mt-1 text-sm font-semibold",
-                  late.isLate ? "text-destructive" : "text-emerald-600"
+                  late.isLate ? "text-destructive" : "text-success"
                 )}
               >
                 {late.isLate ? `Late by ${late.lateByMinutes}m` : "On time"}

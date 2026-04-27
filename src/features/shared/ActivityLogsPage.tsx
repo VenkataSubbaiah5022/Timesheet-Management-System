@@ -14,7 +14,7 @@ export function ActivityLogsPage() {
       <Card className="overflow-hidden">
         <div className="max-h-[min(70vh,32rem)] overflow-auto">
           <table className="w-full border-collapse text-sm">
-            <thead className="sticky top-0 z-10 border-b border-slate-200/90 bg-slate-50/90 backdrop-blur-sm dark:border-slate-800/50 dark:bg-muted/80">
+            <thead className="sticky top-0 z-10 border-b border-border bg-secondary/85 backdrop-blur-sm">
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-foreground">When</th>
                 <th className="px-3 py-2 text-left font-medium text-foreground">Action</th>
@@ -43,7 +43,7 @@ export function ActivityLogsPage() {
 function ActivityRow({ e }: { e: ActivityLogEntry }) {
   const who = e.actorName ? `${e.actorName}${e.actorRole ? ` · ${e.actorRole}` : ""}` : "—";
   return (
-    <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 dark:border-slate-800/40 dark:hover:bg-muted/40">
+    <tr className="border-b border-border/70 last:border-0 hover:bg-secondary/55">
       <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">{dayjs(e.at).format("MMM D, YYYY HH:mm")}</td>
       <td className="px-3 py-2 font-medium text-foreground">{e.action}</td>
       <td className="max-w-[280px] truncate px-3 py-2 text-muted-foreground">{e.detail ?? "—"}</td>
